@@ -3,6 +3,7 @@
 public interface IBotInstance
 {
     public void DoMove();
+    public void DoMove(Game game);
 }
 public class BotInstance : IBotInstance
 {
