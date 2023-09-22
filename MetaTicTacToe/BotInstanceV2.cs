@@ -66,7 +66,7 @@ public class BotInstanceV2 : IBotInstance
         var dia0 = new[] { (0, section[0]), (4, section[4]), (8, section[8]) };
         var dia1 = new[] { (6, section[6]), (4, section[4]), (2, section[2]) };
 
-        int move = GetCriticalMove(OpponentSymbol,row0, row1, row2, col0, col1, col2, dia0, dia1);
+        int move = GetCriticalMove(OpponentSymbol, row0, row1, row2, col0, col1, col2, dia0, dia1);
 
         if (move is -1)
             return Array.Empty<int>();

@@ -59,6 +59,79 @@ public static class BotUtils
 
         return moveIndex;
     }
+
+    public static (string ourSymbol, string enemySymbol) GetPlayerSymbols(Game game)
+    {
+        var ourSymbol = game.players.First(x => x.id == game.self).symbol;
+        var enemySymbol = game.players.First(x => x.id != game.self).symbol;
+        return (ourSymbol, enemySymbol);
+    }
+
+    public static int[] FirstMove(Game game)
+    {
+        var forced = GetForced(game);
+        var boardSectionIndex = GetRandomBoardSectionIndex(game, forced);
+        var board = game.board[boardSectionIndex];
+        var isFirstMove = board.All(x => x == "");
+        if (!isFirstMove)
+        {
+            return Array.Empty<int>();
+        }
+
+        var indexes = new int[] {1, 3, 5, 7};
+        var random = Random.Shared.Next(0, indexes.Length);
+        var boardIndex = indexes[random];
+        return new[] {boardSectionIndex, boardIndex};
+    }
+
+    public static int[] SecondMove(Game game)
+    {
+        var forced = GetForced(game);
+        var boardSectionIndex = GetRandomBoardSectionIndex(game, forced);
+        var board = game.board[boardSectionIndex];
+        var Symbols = GetPlayerSymbols(game);
+        var ourSymbol = Symbols.ourSymbol;
+        var isSecondMove = board.Count(x => x == ourSymbol) == 1;
+        int index = 0;
+        if (isSecondMove)
+        {
+            foreach (var field in board) 
+            {
+                if (field == ourSymbol)
+                {
+                    break;
+                }
+
+                index++;
+            }
+
+            if (index == 1)
+            {
+                return new[] {boardSectionIndex, 3};
+            }
+
+            if (index == 3)
+            {
+                return new[] {boardSectionIndex, 1};
+            }
+
+            if (index == 5)
+            {
+                return new[] {boardSectionIndex, 1};
+            }
+
+            if (index == 7)
+            {
+                return new[] {boardSectionIndex, 3};
+            }
+
+        }
+        var isThirdMove = board.Count(x => x == ourSymbol) == 2;
+        
+        
+        return Array.Empty<int>();
+
+    }
     
     public static void CheckIllegalMove(Game game, int[] move)
     {
@@ -85,5 +158,78 @@ public static class BotUtils
         var json = JsonSerializer.Serialize(game);
         var filePath = Path.Combine(logPath, $"{game.id}.json");
         await File.WriteAllTextAsync(filePath, json, Encoding.UTF8);
+    }
+
+    public static int[] BlockOpponent(Game game)
+    {
+        var forced = GetForced(game);
+        var playSection = GetRandomBoardSectionIndex(game, forced);
+        var symbols = GetPlayerSymbols(game);
+
+        var section = game.board[playSection];
+        var row0 = new[] { (0, section[0]), (1, section[1]), (2, section[2]) };
+        var row1 = new[] { (3, section[3]), (4, section[4]), (5, section[5]) };
+        var row2 = new[] { (6, section[6]), (7, section[7]), (8, section[8]) };
+
+        var col0 = new[] { (0, section[0]), (3, section[3]), (6, section[6]) };
+        var col1 = new[] { (1, section[1]), (4, section[4]), (7, section[7]) };
+        var col2 = new[] { (2, section[2]), (5, section[5]), (8, section[8]) };
+
+        var dia0 = new[] { (0, section[0]), (4, section[4]), (8, section[8]) };
+        var dia1 = new[] { (6, section[6]), (4, section[4]), (2, section[2]) };
+
+        int move = GetCriticalMove(symbols.enemySymbol, row0, row1, row2, col0, col1, col2, dia0, dia1);
+
+        if (move is -1)
+            return Array.Empty<int>();
+
+        return new[] { playSection, move };
+    }
+    
+    public static int[] WinField(Game game)
+    {
+        var forced = GetForced(game);
+        var playSection = GetRandomBoardSectionIndex(game, forced);
+        var symbols = GetPlayerSymbols(game);
+
+        var section = game.board[playSection];
+        var row0 = new[] { (0, section[0]), (1, section[1]), (2, section[2]) };
+        var row1 = new[] { (3, section[3]), (4, section[4]), (5, section[5]) };
+        var row2 = new[] { (6, section[6]), (7, section[7]), (8, section[8]) };
+
+        var col0 = new[] { (0, section[0]), (3, section[3]), (6, section[6]) };
+        var col1 = new[] { (1, section[1]), (4, section[4]), (7, section[7]) };
+        var col2 = new[] { (2, section[2]), (5, section[5]), (8, section[8]) };
+
+        var dia0 = new[] { (0, section[0]), (4, section[4]), (8, section[8]) };
+        var dia1 = new[] { (6, section[6]), (4, section[4]), (2, section[2]) };
+
+        int move = GetCriticalMove(symbols.ourSymbol, row0, row1, row2, col0, col1, col2, dia0, dia1);
+
+        if (move is -1)
+            return Array.Empty<int>();
+
+        return new[] { playSection, move };
+    }
+    
+    private static int GetCriticalMove(string importantSymbol, params (int, string)[][] lines)
+    {
+        for (var index = 0; index < lines.Length; index++)
+        {
+            var line = lines[index];
+            var opCount = line.Count(x => x.Item2 == importantSymbol);
+            if (opCount < 2)
+                continue;
+
+            for (var i = 0; i < line.Length; i++)
+            {
+                var pos = line[i];
+                var symbol = pos.Item2;
+                if (string.IsNullOrWhiteSpace(symbol))
+                    return pos.Item1;
+            }
+        }
+
+        return -1;
     }
 }
