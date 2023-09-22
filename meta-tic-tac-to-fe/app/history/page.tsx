@@ -1,14 +1,16 @@
 'use client';
 
-import {ChangeEvent, ChangeEventHandler, useEffect, useState} from 'react';
+import {ChangeEvent, useEffect, useState} from 'react';
 import {PlayedGame} from '@/app/types';
 import Game from '@/app/Game';
+import {next} from 'sucrase/dist/types/parser/tokenizer';
 import {useGameStore} from '@/app/game-store';
 
 export default function HistoryPage() {
-  const nextStep = useGameStore(state => state.nextStep);
+  const setField = useGameStore(state => state.setField);
   const [playedGames, setPlayedGames] = useState<PlayedGame[]>([]);
   const [viewGame, setViewGame] = useState<PlayedGame | null>(null);
+  const [step, setStep] = useState(0);
 
   const fetchPlayedGames = () => {
     fetch('http://localhost:3000/api/history')
@@ -18,42 +20,51 @@ export default function HistoryPage() {
 
   useEffect(() => fetchPlayedGames(), []);
 
-  useEffect(() => {
-    const interval = setInterval(() => {
-      nextStep();
-    }, 2000)
-
-    return () => {
-      clearInterval(interval);
-    }
-  }, [viewGame]);
-
   const handleChange = (e: ChangeEvent<HTMLSelectElement>) => {
     setViewGame(e.target.value ? playedGames.find(g => g.id === e.target.value)! : null);
   }
 
+  const nextStep = () => {
+    if (!viewGame || step > (viewGame.log.length - 1)) {
+      return;
+    }
+
+    setField(...viewGame.log[step].move);
+
+    const nextStepIndex = step + 1;
+    if (nextStepIndex < viewGame.log.length) {
+      setStep(nextStepIndex);
+    }
+  }
+
   return (
-    <main id={'history-page'} className={'min-w-[800px]'}>
+    <main id={'history-page'} className={'h-screen py-4 min-w-[828px]'}>
       <h1 className={'text-3xl mb-4'}>Historie</h1>
 
-      <div className="w-full flex justify-between">
-        <select value={viewGame?.id}
-                className={'w-[480px] border border-slate-400 p-4 bg-white rounded-xl'}
-                onChange={handleChange}>
-          <option value="">Such dir was aus...</option>
-          {playedGames.map(p => <option key={p.id} value={p.id}>{p.id}</option>)}
-        </select>
+      <div className="w-full flex justify-between mb-4">
+        <div className="flex gap-2">
+          <select value={viewGame?.id}
+                  className={'border border-slate-400 p-4 bg-white rounded-xl'}
+                  onChange={handleChange}>
+            <option value="">Such dir was aus...</option>
+            {playedGames.map(p => <option key={p.id} value={p.id}>{p.id}</option>)}
+          </select>
 
-        <button type={'button'} className={'border border-slate-400 rounded-xl p-4'} onClick={() => fetchPlayedGames()}>
+          {viewGame &&
+            <button type={'button'}
+                    className={'border border-slate-400 hover:bg-slate-200 rounded-xl p-4'}
+                    onClick={() => nextStep()}>
+              Weiter
+            </button>
+          }
+        </div>
+
+        <button type={'button'} className={'border border-slate-400 hover:bg-slate-200 rounded-xl p-4'} onClick={() => fetchPlayedGames()}>
           Neu laden
         </button>
       </div>
 
-      <button onClick={() => nextStep()}>Next step</button>
-
-      {viewGame &&
-        <Game playedGame={viewGame}/>
-      }
+      {viewGame && <Game view/>}
     </main>
   );
 }

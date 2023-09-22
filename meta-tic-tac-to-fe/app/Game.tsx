@@ -5,25 +5,16 @@ import ProgressBar from '@/app/ProgressBar';
 import EndScreen from '@/app/EndScreen';
 import Board from '@/app/Board';
 import {PlayedGame} from '@/app/types';
-import {useEffect} from 'react';
+import {useEffect, useState} from 'react';
 
-export default function Game({playedGame}: {playedGame?: PlayedGame}) {
+export default function Game({view = false}: {view: boolean}) {
   const game = useGameStore(state => state.game);
-  const loadGame = useGameStore(state => state.load);
   const player = useGameStore(state => state.activePlayer);
-
-  useEffect(() => {
-    if (playedGame) {
-      loadGame(playedGame);
-    }
-  }, []);
-
-  console.log(game);
 
   return (
     <>
       <EndScreen/>
-      {!playedGame &&
+      {!view &&
         <>
           <h1 className={'text-3xl text-center'}>JAckathon - Meta Tic-Tac-Toe</h1>
           <h3 className={'text-xl text-center mb-12'}>Game ID: ABC</h3>

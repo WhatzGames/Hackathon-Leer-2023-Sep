@@ -2,7 +2,7 @@
 
 import {create} from 'zustand';
 import {v4 as randomUUID} from 'uuid';
-import {Board, Game, PlayedGame, Player, PlayerSymbol} from '@/app/types';
+import {Board, Field, Game, PlayedGame, Player, PlayerSymbol} from '@/app/types';
 import {Simulate} from 'react-dom/test-utils';
 import play = Simulate.play;
 
@@ -10,21 +10,19 @@ type GameState = {
   game: Game;
   players: Player[];
   playedGame: PlayedGame | null;
-  nextStepIndex: number;
+  winner: PlayerSymbol | null;
   activePlayer: string;
   activeBoard: number | null;
-  overview: (PlayerSymbol | null)[];
+  overview: Field[];
 }
 
 type GameActions = {
-  load: (playedGame: PlayedGame) => void;
-  nextStep: () => void;
   setField: (board: number, field: number) => void;
   switchPlayer: () => void;
   newGame: () => void;
 }
 
-const checkBoard = ({fields}: Board): PlayerSymbol | null => {
+const checkBoard = (fields: Field[]): PlayerSymbol | null => {
   const combinations = [
     [0, 1, 2],
     [3, 4, 5],
@@ -68,7 +66,7 @@ const initialState = (): GameState => {
       {id: randomUUID(), fields: [null, null, null, null, null, null, null, null, null]},
     ],
     playedGame: null,
-    nextStepIndex: 0,
+    winner: null,
     players,
     activePlayer: players.at(0)!.id,
     activeBoard: null,
@@ -85,19 +83,6 @@ export const useGameStore = create<GameState & GameActions>((set, get) => ({
       activePlayer: playedGame.players.at(0)!.id,
       playedGame
     }));
-  },
-  nextStep() {
-    const playedGame = get().playedGame;
-    if (!playedGame) {
-      return;
-    }
-
-    const stepIndex = get().nextStepIndex;
-    const step = playedGame.log[stepIndex];
-
-    if (step) {
-      get().setField(...step.move);
-    }
   },
   setField(board: number, field: number) {
     // board not active - not allowed
@@ -123,9 +108,15 @@ export const useGameStore = create<GameState & GameActions>((set, get) => ({
     const activePlayerIndex = players.findIndex(player => player.id === get().activePlayer);
     game[board].fields[field] = players[activePlayerIndex].symbol;
 
-    const winner = checkBoard(game[board]);
+    const boardWinner = checkBoard(game[board].fields);
+    if (boardWinner) {
+      overview[board] = boardWinner;
+    }
+
+    const winner = checkBoard(overview);
+    let gameWinner = get().winner;
     if (winner) {
-      overview[board] = winner;
+      gameWinner = winner;
     }
 
     // Set new active to last field, otherwise allow random choice
@@ -137,7 +128,7 @@ export const useGameStore = create<GameState & GameActions>((set, get) => ({
       activeBoard,
       overview: overview,
       game,
-      nextStepIndex: get().nextStepIndex + 1
+      winner: gameWinner
     }));
   },
   switchPlayer() {

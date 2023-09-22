@@ -2,8 +2,10 @@ type Game = Board[];
 
 type Board = {
   id: string;
-  fields: (PlayerSymbol | null)[];
+  fields: Field[];
 };
+
+type Field = PlayerSymbol | null;
 
 type PlayerId = string;
 type PlayerSymbol = 'X' | 'O';
@@ -29,6 +31,7 @@ type PlayedGame = {
 export type {
   Game,
   Board,
+  Field,
   Player,
   PlayedGame,
   PlayerSymbol
