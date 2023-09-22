@@ -21,23 +21,89 @@ public sealed class Bot : BackgroundService
         await client.EmitAsync("authenticate",
             (success) => Console.WriteLine($"Authentication successful: {success}"), secret);
 
-        client.On("data", async (data) =>
+        client.On("data", async (response) =>
         {
-            dynamic dynamicData = data;
-            switch (dynamicData.type)
+            var game = response.GetValue<Game>();
+            switch (game.type)
             {
                 case "INIT":
                     Console.WriteLine("Init");
+                    Init(game);
                     break;
                 case "RESULT":
                     Console.WriteLine("Result");
+                    Result(game);
                     break;
                 case "ROUND":
                     Console.WriteLine("Round");
+                    await RoundAsync(game, response);
                     break;
             }
         });
 
-        await Task.Delay(TimeSpan.MaxValue, stoppingToken);
+        while (true)
+        {
+            await Task.Delay(5_000, stoppingToken);
+            Console.WriteLine("Still alive");
+        }
+    }
+
+    private void Init(Game game)
+    {
+    }
+    
+    private void Result(Game game)
+    {
+        // TODO Log results?
+    }
+    
+    private async Task RoundAsync(Game game, SocketIOResponse response)
+    {
+        var move = GetNextMove(game);
+        await response.CallbackAsync(move);
+    }
+
+    private int[] GetNextMove(Game game)
+    {
+        // Forced value?
+        bool forced = false;
+        if (game.forcedSection.HasValue)
+        {
+            int index = game.forcedSection.Value;
+            if (game.overview[index] == "")
+            {
+                forced = true;
+            }
+        }
+
+        // Get board section
+        int chosenBoardIndex = game.forcedSection!.Value;
+        if (!forced)
+        {
+            for (int i = 0; i < game.overview.Count; i++)
+            {
+                var symbol = game.overview[i];
+                if (symbol == "")
+                {
+                    chosenBoardIndex = i;
+                    break;
+                }
+            }
+        }
+        
+        // Get move index
+        int moveIndex = 0;
+        var chosenBoard = game.board[chosenBoardIndex];
+        for (int i = 0; i < chosenBoard.Count; i++)
+        {
+            var symbol = chosenBoard[i];
+            if (symbol == "")
+            {
+                moveIndex = i;
+                break;
+            }
+        }
+
+        return new int[] { chosenBoardIndex, moveIndex };
     }
 }

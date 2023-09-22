@@ -1,6 +1,6 @@
 ﻿namespace MetaTicTacToe;
 
-public class Root
+public class Game
 {
     public string id { get; set; }
 
@@ -8,7 +8,7 @@ public class Root
 
     public List<string> overview { get; set; }
 
-    public object forcedSection { get; set; }
+    public int? forcedSection { get; set; }
 
     public List<List<string>> board { get; set; }
 
