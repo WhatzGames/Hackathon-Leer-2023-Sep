@@ -64,6 +64,14 @@ public class WinnableLines : IEnumerable<(int, string)[]>
 
         _lines = new[] { _row0, _row1, _row2, _col0, _col1, _col2, _dia0, _dia1 };
     }
+
+    public IEnumerable<int> GetNextBestPositions(string symbol)
+    {
+        return _lines.Where(x => x.Any(y => y.Item2 == symbol) 
+                              && x.Any(z => string.IsNullOrWhiteSpace(z.Item2)))
+                     .SelectMany(x=>x)
+                     .Select(x=>x.Item1);
+    }
     
     public IEnumerator<(int, string)[]> GetEnumerator()
     {

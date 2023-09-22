@@ -426,7 +426,7 @@ public static class BotUtils
         return -1;
     }
 
-    private static int GetCriticalMove(string importantSymbol, WinnableLines lines)
+    public static int GetCriticalMove(string importantSymbol, WinnableLines lines)
     {
         foreach (var line in lines)
         {
@@ -466,5 +466,46 @@ public static class BotUtils
         }
 
         return new[] { sectionIndex, positions[0] };
+    }
+
+    public static int[] GetWinnableGameMove(string symbol, List<List<string>> board, WinnableLines metaLines)
+    {
+        var winnableSection = GetCriticalMove(symbol, metaLines);
+        if (winnableSection >= 0)
+        {
+            var winnableLines = new WinnableLines(board[winnableSection]);
+            var winnableMoveIndex = GetCriticalMove(symbol, winnableLines);
+            if (winnableMoveIndex >= 0)
+            {
+                return new[] {winnableSection, winnableMoveIndex};
+            }
+        }
+
+        return Array.Empty<int>();
+    }
+
+    public static int[] GetNextBestMove(Game game, string symbol, WinnableLines lines)
+    {
+        List<int[]> possibleMoves = new List<int[]>();
+        for (var i = 0; i < game.overview.Count; i++)
+        {
+            if(!string.IsNullOrWhiteSpace(game.overview[i]))
+                continue;
+            var sectionLines = new WinnableLines(game.board[i]);
+            var position = GetCriticalMove(symbol, sectionLines);
+            if (position >= 0)
+            {
+                possibleMoves.Add(new []{i, position});
+            }
+        }
+
+        var nexBestSections = lines.GetNextBestPositions(symbol).ToHashSet();
+        foreach (int[] possibleMove in possibleMoves)
+        {
+            if (nexBestSections.Contains(possibleMove[0]))
+                return possibleMove;
+        }
+
+        return possibleMoves.FirstOrDefault(Array.Empty<int>());
     }
 }

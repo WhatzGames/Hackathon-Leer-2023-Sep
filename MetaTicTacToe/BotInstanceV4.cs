@@ -1,8 +1,8 @@
 ﻿namespace MetaTicTacToe;
 
-public class BotInstanceV4 : IBotInstance
+public class BotInstanceV4
 {
-    public int[] DoMove(Game game)
+    public static int[] DoMove(Game game)
     {
         // Win
         var resultWinField = BotUtils.WinField(game);
