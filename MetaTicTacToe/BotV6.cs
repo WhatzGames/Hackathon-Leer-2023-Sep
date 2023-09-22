@@ -76,6 +76,7 @@ public sealed class BotV6 : BackgroundService
             var ourWinnableMove = BotUtils.GetWinnableGameMove(ourSymbol, game.board, lines);
             if (ourWinnableMove.Length > 0)
             {
+                BotUtils.CheckIllegalMove(game, ourWinnableMove, "BotUtils.GetWinnableGameMove our winnable");
                 return ourWinnableMove;
             }
 
@@ -83,6 +84,7 @@ public sealed class BotV6 : BackgroundService
             var enemyWinnableMove= BotUtils.GetWinnableGameMove(enemySymbol, game.board, lines);
             if (enemyWinnableMove.Length > 0)
             {
+                BotUtils.CheckIllegalMove(game, enemyWinnableMove, "BotUtils.GetWinnableGameMove enemy winable");
                 return enemyWinnableMove;
             }
 
@@ -91,6 +93,7 @@ public sealed class BotV6 : BackgroundService
             var enemyNextMove = BotUtils.GetNextBestMove(game, enemySymbol, lines);
             if (enemyNextMove.Length > 0)
             {
+                BotUtils.CheckIllegalMove(game, enemyNextMove, "BotUtils.GetNextBestMove enemynextmove");
                 return enemyNextMove;
             }
 
@@ -98,6 +101,7 @@ public sealed class BotV6 : BackgroundService
             var ournextBestMove = BotUtils.GetNextBestMove(game, ourSymbol, lines);
             if (ournextBestMove.Length > 0)
             {
+                BotUtils.CheckIllegalMove(game, ournextBestMove, "BotUtils.GetNextBestMove ournextbestmove");
                 return ournextBestMove;
             }
         }
@@ -117,14 +121,24 @@ public sealed class BotV6 : BackgroundService
 
         Console.WriteLine("Reconnected!");
     }
-    public static int[] DoMoveBotV6(Game game)
+    private static int[] DoMoveBotV6(Game game)
     {
-        //todo:hier beste metaboard choice durchführern und diese in den methoden übergeben
-        var weightedMetaBoards = BotUtils.GetWeightedMetaBoards(game);
-        var bestBoardIndex = weightedMetaBoards.First().BoardIndex;
         
+        var forced = BotUtils.GetForced(game);
+        int boardSectionIndex;
+        if (forced)
+        {
+            boardSectionIndex = game.forcedSection!.Value;
+        }
+        else
+        {
+            //todo: hier beste metaboard choice durchführern und diese in den methoden übergeben
+            var weightedMetaBoards = BotUtils.GetWeightedMetaBoards(game);
+            boardSectionIndex = weightedMetaBoards.First().BoardIndex;
+        }
+
         // Win
-        var resultWinField = BotUtils.WinFieldV2(game, bestBoardIndex);
+        var resultWinField = BotUtils.WinFieldV2(game, boardSectionIndex);
         if (resultWinField.Length > 0)
         {
             BotUtils.CheckIllegalMove(game, resultWinField, "resultWinField");
@@ -133,7 +147,7 @@ public sealed class BotV6 : BackgroundService
         }
 
         // Block
-        var resultBlockOpponent = BotUtils.BlockOpponentV2(game, bestBoardIndex);
+        var resultBlockOpponent = BotUtils.BlockOpponentV2(game, boardSectionIndex);
         if (resultBlockOpponent.Length > 0)
         {
             BotUtils.CheckIllegalMove(game, resultBlockOpponent, "resultBlockOpponent");
@@ -143,38 +157,28 @@ public sealed class BotV6 : BackgroundService
 
         // First move
         var (ourSymbol, enemySymbol) = BotUtils.GetPlayerSymbols(game);
-        var firstMove = BotUtils.FirstMoveV3(game, bestBoardIndex);
+        var firstMove = BotUtils.FirstMoveV3(game, boardSectionIndex);
         if (firstMove.Length > 0)
         {
             BotUtils.CheckIllegalMove(game, firstMove, "firstMove");
             return firstMove;
         }
 
-        // Second move
-        var weightedPossibleMoves = BotUtils.GetWeightedSectionMoves(game, bestBoardIndex);
-        var possibleMoves = weightedPossibleMoves.Select(x => x.Move[1])
-                                                 .ToArray();
-        
+        // "Best" move
+        var weightedPossibleMoves = BotUtils.GetWeightedSectionMoves(game, boardSectionIndex);
+        var possibleMoves = weightedPossibleMoves.Select(x => x.Move[1]).ToArray();
         if (possibleMoves.Length > 0)
         {
-            var metaMove = BotUtils.GetNextBestMetaMove(ourSymbol, enemySymbol, bestBoardIndex,
+            var metaMove = BotUtils.GetNextBestMetaMove(ourSymbol, enemySymbol, boardSectionIndex,
                 possibleMoves, game);
-            var valueOfField = game.board[metaMove[0]][metaMove[1]];
-            if (valueOfField == "")
-            {
-                BotUtils.CheckIllegalMove(game, metaMove, "secondMove");
-                return metaMove;
-            }
+            BotUtils.CheckIllegalMove(game, metaMove, "secondMove");
+            return metaMove;
         }
         
-        // Most efficient local move
-        
-
         // Random fallback
-        var forced = BotUtils.GetForced(game);
-        var boardSectionIndex = BotUtils.GetRandomBoardSectionIndex(game, forced);
-        var boardIndex = BotUtils.GetRandomBoardMoveIndex(game, boardSectionIndex);
-        var move = new[] { boardSectionIndex, boardIndex };
+        var randomBoardSectionIndex = BotUtils.GetRandomBoardSectionIndex(game, forced);
+        var boardIndex = BotUtils.GetRandomBoardMoveIndex(game, randomBoardSectionIndex);
+        var move = new[] { randomBoardSectionIndex, boardIndex };
         Console.WriteLine("Board:" + move[0] + " Feld:" + move[1]);
         BotUtils.CheckIllegalMove(game, move, "random move");
         return move;
