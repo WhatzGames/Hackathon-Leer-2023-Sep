@@ -21,7 +21,7 @@ public static class BotUtils
 
     public static int GetRandomBoardSectionIndex(Game game, bool forced)
     {
-        if (forced)
+        if (forced && game.overview[game.forcedSection!.Value] == "")
         {
             return game.forcedSection!.Value;
         }
@@ -44,19 +44,18 @@ public static class BotUtils
     {
         int moveIndex = 0;
         var chosenBoard = game.board[boardSectionIndex];
+        var freeIndexes = new List<int>();
         for (int i = 0; i < chosenBoard.Count; i++)
         {
-            var freeIndexes = new List<int>();
             var symbol = chosenBoard[i];
             if (symbol == "")
             {
                 freeIndexes.Add(i);
             }
-            
-            var random = Random.Shared.Next(0, freeIndexes.Count);
-            moveIndex = freeIndexes[random];
         }
-
+        
+        var random = Random.Shared.Next(0, freeIndexes.Count);
+        moveIndex = freeIndexes[random];
         return moveIndex;
     }
 
@@ -91,48 +90,118 @@ public static class BotUtils
         var board = game.board[boardSectionIndex];
         var Symbols = GetPlayerSymbols(game);
         var ourSymbol = Symbols.ourSymbol;
-        var isSecondMove = board.Count(x => x == ourSymbol) == 1;
-        int index = 0;
-        if (isSecondMove)
+
+        if (board[1] == ourSymbol)
         {
-            foreach (var field in board) 
+            if (board[3] == ourSymbol)
             {
-                if (field == ourSymbol)
+                if (board[0] == ourSymbol)
                 {
-                    break;
+                    return Array.Empty<int>();
                 }
 
-                index++;
+                return new[] {boardSectionIndex, 0};
             }
 
-            if (index == 1)
+            if (board[5] == ourSymbol)
             {
-                return new[] {boardSectionIndex, 3};
+                if (board[2] == ourSymbol)
+                {
+                    return Array.Empty<int>();
+                }
+
+                return new[] {boardSectionIndex, 2};
             }
 
-            if (index == 3)
-            {
-                return new[] {boardSectionIndex, 1};
-            }
-
-            if (index == 5)
-            {
-                return new[] {boardSectionIndex, 1};
-            }
-
-            if (index == 7)
-            {
-                return new[] {boardSectionIndex, 3};
-            }
-
+            return new[] {boardSectionIndex, 5};
+            return new[] {boardSectionIndex, 3};
         }
-        var isThirdMove = board.Count(x => x == ourSymbol) == 2;
-        
-        
+
+        if (board[3] == ourSymbol)
+        {
+            if (board[1] == ourSymbol)
+            {
+                if (board[0] == ourSymbol)
+                {
+                    return Array.Empty<int>();
+                }
+
+                return new[] {boardSectionIndex, 0};
+            }
+
+            if (board[7] == ourSymbol)
+            {
+                if (board[6] == ourSymbol)
+                {
+                    return Array.Empty<int>();
+                }
+
+                return new[] {boardSectionIndex, 6};
+            }
+
+            return new[] {boardSectionIndex, 1};
+            return new[] {boardSectionIndex, 7};
+        }
+
+        if (board[5] == ourSymbol)
+        {
+            if (board[1] == ourSymbol)
+            {
+                if (board[2] == ourSymbol)
+                {
+                    return Array.Empty<int>();
+                }
+
+                return new[] {boardSectionIndex, 2};
+            }
+
+            if (board[7] == ourSymbol)
+            {
+                if (board[8] == ourSymbol)
+                {
+                    return Array.Empty<int>();
+                }
+
+                return new[] {boardSectionIndex, 8};
+            }
+
+            return new[] {boardSectionIndex, 1};
+            return new[] {boardSectionIndex, 7};
+        }
+
+        if (board[7] == ourSymbol)
+        {
+            if (board[3] == ourSymbol)
+            {
+                if (board[6] == ourSymbol)
+                {
+                    return Array.Empty<int>();
+                }
+
+                return new[] {boardSectionIndex, 6};
+            }
+
+            if (board[5] == ourSymbol)
+            {
+                if (board[8] == ourSymbol)
+                {
+                    return Array.Empty<int>();
+                }
+
+                return new[] {boardSectionIndex, 8};
+            }
+
+            return new[] {boardSectionIndex, 5};
+            return new[] {boardSectionIndex, 3};
+        }
+
+
+
+
         return Array.Empty<int>();
 
     }
-    
+
     public static void CheckIllegalMove(Game game, int[] move)
     {
         int idx1 = move[0];

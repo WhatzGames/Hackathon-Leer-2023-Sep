@@ -69,6 +69,7 @@ public sealed class BotV3 : BackgroundService
         if (resultWinField.Length > 0)
         {
             BotUtils.CheckIllegalMove(game, resultWinField);
+            Console.WriteLine("Board:" + resultWinField[0] + " Feld:" + resultWinField[1]);
             return resultWinField;
         }
 
@@ -76,6 +77,7 @@ public sealed class BotV3 : BackgroundService
         if (resultBlockOpponent.Length > 0)
         {
             BotUtils.CheckIllegalMove(game, resultBlockOpponent);
+            Console.WriteLine("Board:" + resultBlockOpponent[0] + " Feld:" + resultBlockOpponent[1]);
             return resultBlockOpponent;
         }
 
@@ -83,7 +85,16 @@ public sealed class BotV3 : BackgroundService
         if (firstMove.Length > 0)
         {
             BotUtils.CheckIllegalMove(game, firstMove);
+            Console.WriteLine("Board:" + firstMove[0] + " Feld:" + firstMove[1]);
             return firstMove;
+        }
+
+        var secondMove = BotUtils.SecondMove(game);
+        if (secondMove.Length > 0)
+        {
+            BotUtils.CheckIllegalMove(game, secondMove);
+            Console.WriteLine("Board:" + secondMove[0] + " Feld:" + secondMove[1]);
+            return secondMove;
         }
         
         
@@ -93,6 +104,7 @@ public sealed class BotV3 : BackgroundService
         var boardSectionIndex = BotUtils.GetRandomBoardSectionIndex(game, forced);
         var boardIndex = BotUtils.GetRandomBoardMoveIndex(game, boardSectionIndex);
         var move = new[] {boardSectionIndex, boardIndex};
+        Console.WriteLine("Board:" + move[0] + " Feld:" + move[1]);
         BotUtils.CheckIllegalMove(game, move);
         return move;
     }
