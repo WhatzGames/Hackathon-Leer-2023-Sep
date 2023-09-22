@@ -1,57 +1,70 @@
 import {create} from 'zustand';
+import {v4 as randomUUID} from 'uuid';
 
 type Game = Board[];
-type Board = (Player | null)[];
+type Board = {
+  id: string;
+  fields: (Player | null)[];
+};
 type Player = 'X' | 'O';
 
-type GameStore = {
+type GameState = {
   player: Player;
   activeBoard: number | null;
   finishedBoards: (Player | null)[];
   game: Game;
-  setField: (board: number, field: number) => void;
 }
 
-const checkBoard = (board: Board): Player | null => {
+type GameActions = {
+  setField: (board: number, field: number) => void;
+  switchPlayer: () => void;
+  newGame: () => void;
+}
+
+const checkBoard = ({fields}: Board): Player | null => {
   const combinations = [
-    [0,1,2],
-    [3,4,5],
-    [6,7,8],
-    [0,3,6],
-    [1,4,7],
-    [2,5,8],
-    [0,4,8],
-    [2,4,6],
+    [0, 1, 2],
+    [3, 4, 5],
+    [6, 7, 8],
+    [0, 3, 6],
+    [1, 4, 7],
+    [2, 5, 8],
+    [0, 4, 8],
+    [2, 4, 6],
   ];
 
   for (const combination of combinations) {
-    if (!board[combination[0]] || !board[combination[1]] || !board[combination[2]]) {
+    if (!fields[combination[0]] || !fields[combination[1]] || !fields[combination[2]]) {
       continue;
     }
 
-    if (board[combination[0]] === board[combination[1]] && board[combination[1]] === board[combination[2]]) {
-      return board[combination[0]];
+    if (fields[combination[0]] === fields[combination[1]] && fields[combination[1]] === fields[combination[2]]) {
+      return fields[combination[0]];
     }
   }
 
   return null;
-}
+};
 
-export const useGameStore = create<GameStore>((set, get) => ({
+const initialState = (): GameState => ({
   player: 'X',
   activeBoard: null,
   finishedBoards: [null, null, null, null, null, null, null, null, null],
   game: [
-    [null, null, null, null, null, null, null, null, null],
-    [null, null, null, null, null, null, null, null, null],
-    [null, null, null, null, null, null, null, null, null],
-    [null, null, null, null, null, null, null, null, null],
-    [null, null, null, null, null, null, null, null, null],
-    [null, null, null, null, null, null, null, null, null],
-    [null, null, null, null, null, null, null, null, null],
-    [null, null, null, null, null, null, null, null, null],
-    [null, null, null, null, null, null, null, null, null],
-  ],
+    {id: randomUUID(), fields: [null, null, null, null, null, null, null, null, null]},
+    {id: randomUUID(), fields: [null, null, null, null, null, null, null, null, null]},
+    {id: randomUUID(), fields: [null, null, null, null, null, null, null, null, null]},
+    {id: randomUUID(), fields: [null, null, null, null, null, null, null, null, null]},
+    {id: randomUUID(), fields: [null, null, null, null, null, null, null, null, null]},
+    {id: randomUUID(), fields: [null, null, null, null, null, null, null, null, null]},
+    {id: randomUUID(), fields: [null, null, null, null, null, null, null, null, null]},
+    {id: randomUUID(), fields: [null, null, null, null, null, null, null, null, null]},
+    {id: randomUUID(), fields: [null, null, null, null, null, null, null, null, null]},
+  ]
+});
+
+export const useGameStore = create<GameState & GameActions>((set, get) => ({
+  ...initialState(),
   setField(board: number, field: number) {
     // board not active - not allowed
     let activeBoard = get().activeBoard;
@@ -67,12 +80,12 @@ export const useGameStore = create<GameStore>((set, get) => ({
 
     // Field set - not allowed
     const game = get().game;
-    if (game[board][field] != null) {
+    if (game[board].fields[field] != null) {
       return;
     }
 
     // Set field to player
-    game[board][field] = get().player;
+    game[board].fields[field] = get().player;
 
     const winner = checkBoard(game[board]);
     if (winner) {
@@ -88,6 +101,18 @@ export const useGameStore = create<GameStore>((set, get) => ({
       activeBoard,
       finishedBoards,
       game
+    }));
+  },
+  switchPlayer() {
+    set((state) => ({
+      ...state,
+      player: state.player === 'X' ? 'O' : 'X',
+    }));
+  },
+  newGame() {
+    set((state) => ({
+      ...state,
+      ...initialState(),
     }));
   }
 }));
