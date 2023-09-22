@@ -13,7 +13,7 @@ export default function Field({board, field, width = 80, height = 80, children}:
   const handleClick = () => setField(board, field);
 
   return (
-    <button className={'border border-cyan-400 hover:bg-cyan-300 hover:animate-pulse'}
+    <button className={'border border-cyan-400 text-3xl hover:bg-cyan-300 hover:animate-pulse'}
             onClick={handleClick}
             style={{width, height}}>
       {children}

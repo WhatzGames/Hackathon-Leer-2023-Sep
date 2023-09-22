@@ -2,14 +2,18 @@
 
 import {create} from 'zustand';
 import {v4 as randomUUID} from 'uuid';
-import {Board, Game, Player, PlayerSymbol} from '@/app/types';
+import {Board, Field, Game, PlayedGame, Player, PlayerSymbol} from '@/app/types';
+import {Simulate} from 'react-dom/test-utils';
+import play = Simulate.play;
 
 type GameState = {
+  game: Game;
   players: Player[];
+  playedGame: PlayedGame | null;
+  winner: PlayerSymbol | null;
   activePlayer: string;
   activeBoard: number | null;
-  overview: (PlayerSymbol | null)[];
-  game: Game;
+  overview: Field[];
 }
 
 type GameActions = {
@@ -18,7 +22,7 @@ type GameActions = {
   newGame: () => void;
 }
 
-const checkBoard = ({fields}: Board): PlayerSymbol | null => {
+const checkBoard = (fields: Field[]): PlayerSymbol | null => {
   const combinations = [
     [0, 1, 2],
     [3, 4, 5],
@@ -50,10 +54,6 @@ const initialState = (): GameState => {
   ];
 
   return {
-    players,
-    activePlayer: players.at(0)!.id,
-    activeBoard: null,
-    overview: [null, null, null, null, null, null, null, null, null],
     game: [
       {id: randomUUID(), fields: [null, null, null, null, null, null, null, null, null]},
       {id: randomUUID(), fields: [null, null, null, null, null, null, null, null, null]},
@@ -64,12 +64,26 @@ const initialState = (): GameState => {
       {id: randomUUID(), fields: [null, null, null, null, null, null, null, null, null]},
       {id: randomUUID(), fields: [null, null, null, null, null, null, null, null, null]},
       {id: randomUUID(), fields: [null, null, null, null, null, null, null, null, null]},
-    ]
+    ],
+    playedGame: null,
+    winner: null,
+    players,
+    activePlayer: players.at(0)!.id,
+    activeBoard: null,
+    overview: [null, null, null, null, null, null, null, null, null],
   }
 }
 
 export const useGameStore = create<GameState & GameActions>((set, get) => ({
   ...initialState(),
+  load(playedGame: PlayedGame) {
+    set((state) => ({
+      ...state,
+      players: playedGame.players,
+      activePlayer: playedGame.players.at(0)!.id,
+      playedGame
+    }));
+  },
   setField(board: number, field: number) {
     // board not active - not allowed
     let activeBoard = get().activeBoard;
@@ -84,7 +98,7 @@ export const useGameStore = create<GameState & GameActions>((set, get) => ({
     }
 
     // Field set - not allowed
-    const game = get().game;
+    const game = structuredClone(get().game);
     if (game[board].fields[field] != null) {
       return;
     }
@@ -94,9 +108,15 @@ export const useGameStore = create<GameState & GameActions>((set, get) => ({
     const activePlayerIndex = players.findIndex(player => player.id === get().activePlayer);
     game[board].fields[field] = players[activePlayerIndex].symbol;
 
-    const winner = checkBoard(game[board]);
+    const boardWinner = checkBoard(game[board].fields);
+    if (boardWinner) {
+      overview[board] = boardWinner;
+    }
+
+    const winner = checkBoard(overview);
+    let gameWinner = get().winner;
     if (winner) {
-      overview[board] = winner;
+      gameWinner = winner;
     }
 
     // Set new active to last field, otherwise allow random choice
@@ -107,7 +127,8 @@ export const useGameStore = create<GameState & GameActions>((set, get) => ({
       activePlayer: activePlayerIndex === 0 ? players[1].id : players[0].id,
       activeBoard,
       overview: overview,
-      game
+      game,
+      winner: gameWinner
     }));
   },
   switchPlayer() {
