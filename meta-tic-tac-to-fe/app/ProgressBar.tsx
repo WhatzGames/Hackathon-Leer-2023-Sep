@@ -6,12 +6,12 @@ export default function ProgressBar() {
   const player = useGameStore(state => state.activePlayer);
   const {progress, tick, reset} = useProgressStore();
 
-  /*useEffect(() => {
+  useEffect(() => {
     const interval = setInterval(() => tick(), 50);
     return () => {
       clearInterval(interval);
     };
-  },  []);*/
+  },  []);
 
   useEffect(() => {
     reset();
