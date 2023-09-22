@@ -2,17 +2,23 @@
 
 import {create} from 'zustand';
 import {v4 as randomUUID} from 'uuid';
-import {Board, Game, Player, PlayerSymbol} from '@/app/types';
+import {Board, Game, PlayedGame, Player, PlayerSymbol} from '@/app/types';
+import {Simulate} from 'react-dom/test-utils';
+import play = Simulate.play;
 
 type GameState = {
+  game: Game;
   players: Player[];
+  playedGame: PlayedGame | null;
+  nextStepIndex: number;
   activePlayer: string;
   activeBoard: number | null;
   overview: (PlayerSymbol | null)[];
-  game: Game;
 }
 
 type GameActions = {
+  load: (playedGame: PlayedGame) => void;
+  nextStep: () => void;
   setField: (board: number, field: number) => void;
   switchPlayer: () => void;
   newGame: () => void;
@@ -50,10 +56,6 @@ const initialState = (): GameState => {
   ];
 
   return {
-    players,
-    activePlayer: players.at(0)!.id,
-    activeBoard: null,
-    overview: [null, null, null, null, null, null, null, null, null],
     game: [
       {id: randomUUID(), fields: [null, null, null, null, null, null, null, null, null]},
       {id: randomUUID(), fields: [null, null, null, null, null, null, null, null, null]},
@@ -64,12 +66,39 @@ const initialState = (): GameState => {
       {id: randomUUID(), fields: [null, null, null, null, null, null, null, null, null]},
       {id: randomUUID(), fields: [null, null, null, null, null, null, null, null, null]},
       {id: randomUUID(), fields: [null, null, null, null, null, null, null, null, null]},
-    ]
+    ],
+    playedGame: null,
+    nextStepIndex: 0,
+    players,
+    activePlayer: players.at(0)!.id,
+    activeBoard: null,
+    overview: [null, null, null, null, null, null, null, null, null],
   }
 }
 
 export const useGameStore = create<GameState & GameActions>((set, get) => ({
   ...initialState(),
+  load(playedGame: PlayedGame) {
+    set((state) => ({
+      ...state,
+      players: playedGame.players,
+      activePlayer: playedGame.players.at(0)!.id,
+      playedGame
+    }));
+  },
+  nextStep() {
+    const playedGame = get().playedGame;
+    if (!playedGame) {
+      return;
+    }
+
+    const stepIndex = get().nextStepIndex;
+    const step = playedGame.log[stepIndex];
+
+    if (step) {
+      get().setField(...step.move);
+    }
+  },
   setField(board: number, field: number) {
     // board not active - not allowed
     let activeBoard = get().activeBoard;
@@ -84,7 +113,7 @@ export const useGameStore = create<GameState & GameActions>((set, get) => ({
     }
 
     // Field set - not allowed
-    const game = get().game;
+    const game = structuredClone(get().game);
     if (game[board].fields[field] != null) {
       return;
     }
@@ -107,7 +136,8 @@ export const useGameStore = create<GameState & GameActions>((set, get) => ({
       activePlayer: activePlayerIndex === 0 ? players[1].id : players[0].id,
       activeBoard,
       overview: overview,
-      game
+      game,
+      nextStepIndex: get().nextStepIndex + 1
     }));
   },
   switchPlayer() {

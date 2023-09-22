@@ -21,7 +21,7 @@ type PlayedGame = {
   log: {
     player: string;
     move: [number, number];
-  };
+  }[];
   type: 'RESULT';
   self: PlayerId;
 }
