@@ -3,7 +3,7 @@ import {useGameStore} from '@/app/game-store';
 
 export default function EndScreen() {
   const progress = useProgressStore(state => state.progress);
-  const player = useGameStore(state => state.player);
+  const player = useGameStore(state => state.activePlayer);
   const newGame = useGameStore(state => state.newGame);
   const resetProgress = useProgressStore(state => state.reset);
 

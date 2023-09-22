@@ -9,7 +9,7 @@ type BoardProps = {
 
 export default function Board({boardNo, fields}: BoardProps) {
   const activeBoard = useGameStore(state => state.activeBoard);
-  const finishedBoards = useGameStore(state => state.finishedBoards);
+  const finishedBoards = useGameStore(state => state.overview);
   const winner = finishedBoards[boardNo];
 
   return (

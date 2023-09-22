@@ -1,3 +1,5 @@
+'use client';
+
 import {useGameStore} from '@/app/game-store';
 import ProgressBar from '@/app/ProgressBar';
 import EndScreen from '@/app/EndScreen';
@@ -5,7 +7,7 @@ import Board from '@/app/Board';
 
 export default function Game() {
   const game = useGameStore(state => state.game);
-  const player = useGameStore(state => state.player);
+  const player = useGameStore(state => state.activePlayer);
 
   return (
     <>

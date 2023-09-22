@@ -3,7 +3,7 @@ import {useProgressStore} from '@/app/progress-store';
 import {useEffect} from 'react';
 
 export default function ProgressBar() {
-  const player = useGameStore(state => state.player);
+  const player = useGameStore(state => state.activePlayer);
   const {progress, tick, reset} = useProgressStore();
 
   /*useEffect(() => {
