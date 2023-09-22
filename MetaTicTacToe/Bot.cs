@@ -21,23 +21,40 @@ public sealed class Bot : BackgroundService
         await client.EmitAsync("authenticate",
             (success) => Console.WriteLine($"Authentication successful: {success}"), secret);
 
-        client.On("data", async (data) =>
+        client.On("data", async (response) =>
         {
-            dynamic dynamicData = data;
-            switch (dynamicData.type)
+            var game = response.GetValue<Game>();
+            switch (game.type)
             {
                 case "INIT":
                     Console.WriteLine("Init");
+                    Init(game);
                     break;
                 case "RESULT":
                     Console.WriteLine("Result");
+                    Result(game);
                     break;
                 case "ROUND":
                     Console.WriteLine("Round");
+                    await RoundAsync(game, response);
                     break;
             }
         });
 
         await Task.Delay(TimeSpan.MaxValue, stoppingToken);
+    }
+
+    private void Init(Game game)
+    {
+    }
+    
+    private void Result(Game game)
+    {
+        // TODO Log results?
+    }
+    
+    private async Task RoundAsync(Game game, SocketIOResponse response)
+    {
+        await response.CallbackAsync(new int[0,0]);
     }
 }
