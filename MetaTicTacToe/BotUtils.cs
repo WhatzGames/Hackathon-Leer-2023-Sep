@@ -25,7 +25,7 @@ public static class BotUtils
         {
             return game.forcedSection!.Value;
         }
-        
+
         var freeIndexes = new List<int>();
         for (int i = 0; i < game.overview.Count; i++)
         {
@@ -39,7 +39,7 @@ public static class BotUtils
         var random = Random.Shared.Next(0, freeIndexes.Count);
         return freeIndexes[random];
     }
-    
+
     public static int GetRandomBoardMoveIndex(Game game, int boardSectionIndex)
     {
         int moveIndex = 0;
@@ -53,7 +53,7 @@ public static class BotUtils
                 freeIndexes.Add(i);
             }
         }
-        
+
         var random = Random.Shared.Next(0, freeIndexes.Count);
         moveIndex = freeIndexes[random];
         return moveIndex;
@@ -77,10 +77,25 @@ public static class BotUtils
             return Array.Empty<int>();
         }
 
-        var indexes = new int[] {1, 3, 5, 7};
+        var indexes = new int[] { 1, 3, 5, 7 };
         var random = Random.Shared.Next(0, indexes.Length);
         var boardIndex = indexes[random];
-        return new[] {boardSectionIndex, boardIndex};
+        return new[] { boardSectionIndex, boardIndex };
+    }
+
+    public static (int SectionIndex, int[] Positions) FirstMove2(Game game)
+    {
+        var forced = GetForced(game);
+        var boardSectionIndex = GetRandomBoardSectionIndex(game, forced);
+        var board = game.board[boardSectionIndex];
+        var isFirstMove = board.All(x => x == "");
+        if (!isFirstMove)
+        {
+            return (boardSectionIndex, Array.Empty<int>());
+        }
+
+        var indexes = new[] { 1, 3, 5, 7 };
+        return (boardSectionIndex, indexes);
     }
 
     public static int[] SecondMove(Game game)
@@ -100,7 +115,7 @@ public static class BotUtils
                     return Array.Empty<int>();
                 }
 
-                return new[] {boardSectionIndex, 0};
+                return new[] { boardSectionIndex, 0 };
             }
 
             if (board[5] == ourSymbol)
@@ -110,11 +125,11 @@ public static class BotUtils
                     return Array.Empty<int>();
                 }
 
-                return new[] {boardSectionIndex, 2};
+                return new[] { boardSectionIndex, 2 };
             }
 
-            return new[] {boardSectionIndex, 5};
-            return new[] {boardSectionIndex, 3};
+            return new[] { boardSectionIndex, 5 };
+            return new[] { boardSectionIndex, 3 };
         }
 
         if (board[3] == ourSymbol)
@@ -126,7 +141,7 @@ public static class BotUtils
                     return Array.Empty<int>();
                 }
 
-                return new[] {boardSectionIndex, 0};
+                return new[] { boardSectionIndex, 0 };
             }
 
             if (board[7] == ourSymbol)
@@ -136,11 +151,11 @@ public static class BotUtils
                     return Array.Empty<int>();
                 }
 
-                return new[] {boardSectionIndex, 6};
+                return new[] { boardSectionIndex, 6 };
             }
 
-            return new[] {boardSectionIndex, 1};
-            return new[] {boardSectionIndex, 7};
+            return new[] { boardSectionIndex, 1 };
+            return new[] { boardSectionIndex, 7 };
         }
 
         if (board[5] == ourSymbol)
@@ -152,7 +167,7 @@ public static class BotUtils
                     return Array.Empty<int>();
                 }
 
-                return new[] {boardSectionIndex, 2};
+                return new[] { boardSectionIndex, 2 };
             }
 
             if (board[7] == ourSymbol)
@@ -162,11 +177,11 @@ public static class BotUtils
                     return Array.Empty<int>();
                 }
 
-                return new[] {boardSectionIndex, 8};
+                return new[] { boardSectionIndex, 8 };
             }
 
-            return new[] {boardSectionIndex, 1};
-            return new[] {boardSectionIndex, 7};
+            return new[] { boardSectionIndex, 1 };
+            return new[] { boardSectionIndex, 7 };
         }
 
         if (board[7] == ourSymbol)
@@ -178,7 +193,7 @@ public static class BotUtils
                     return Array.Empty<int>();
                 }
 
-                return new[] {boardSectionIndex, 6};
+                return new[] { boardSectionIndex, 6 };
             }
 
             if (board[5] == ourSymbol)
@@ -188,19 +203,128 @@ public static class BotUtils
                     return Array.Empty<int>();
                 }
 
-                return new[] {boardSectionIndex, 8};
+                return new[] { boardSectionIndex, 8 };
             }
 
-            return new[] {boardSectionIndex, 5};
-            return new[] {boardSectionIndex, 3};
+            return new[] { boardSectionIndex, 5 };
+            return new[] { boardSectionIndex, 3 };
         }
 
 
-
-
         return Array.Empty<int>();
-
     }
+
+    public static (int SectionIndex, int[] Positions) SecondMove2(Game game)
+    {
+        var forced = GetForced(game);
+        var boardSectionIndex = GetRandomBoardSectionIndex(game, forced);
+        var board = game.board[boardSectionIndex];
+        var Symbols = GetPlayerSymbols(game);
+        var ourSymbol = Symbols.ourSymbol;
+
+        if (board[1] == ourSymbol)
+        {
+            if (board[3] == ourSymbol)
+            {
+                if (board[0] == ourSymbol)
+                {
+                    return (boardSectionIndex, Array.Empty<int>());
+                }
+
+                return (boardSectionIndex, new[] { 0 });
+            }
+
+            if (board[5] == ourSymbol)
+            {
+                if (board[2] == ourSymbol)
+                {
+                    return (boardSectionIndex, Array.Empty<int>());
+                }
+
+                return (boardSectionIndex, new[] { 2 });
+            }
+
+            return (boardSectionIndex, new[] { 5, 3 });
+        }
+
+        if (board[3] == ourSymbol)
+        {
+            if (board[1] == ourSymbol)
+            {
+                if (board[0] == ourSymbol)
+                {
+                    return (boardSectionIndex, Array.Empty<int>());
+                }
+
+                return (boardSectionIndex, new[] { 0 });
+            }
+
+            if (board[7] == ourSymbol)
+            {
+                if (board[6] == ourSymbol)
+                {
+                    return (boardSectionIndex, Array.Empty<int>());
+                }
+
+                return (boardSectionIndex, new[] { 6 });
+            }
+
+            return (boardSectionIndex, new[] { 1, 7 });
+        }
+
+        if (board[5] == ourSymbol)
+        {
+            if (board[1] == ourSymbol)
+            {
+                if (board[2] == ourSymbol)
+                {
+                    return (boardSectionIndex, Array.Empty<int>());
+                }
+
+                return (boardSectionIndex, new[] { 2 });
+            }
+
+            if (board[7] == ourSymbol)
+            {
+                if (board[8] == ourSymbol)
+                {
+                    return (boardSectionIndex, Array.Empty<int>());
+                }
+
+                return (boardSectionIndex, new[] { 8 });
+            }
+
+            return (boardSectionIndex, new[] { 1, 7 });
+        }
+
+        if (board[7] == ourSymbol)
+        {
+            if (board[3] == ourSymbol)
+            {
+                if (board[6] == ourSymbol)
+                {
+                    return (boardSectionIndex, Array.Empty<int>());
+                }
+
+                return (boardSectionIndex, new[] { 6 });
+            }
+
+            if (board[5] == ourSymbol)
+            {
+                if (board[8] == ourSymbol)
+                {
+                    return (boardSectionIndex, Array.Empty<int>());
+                }
+
+                return (boardSectionIndex, new[] { 8 });
+            }
+
+            return (boardSectionIndex, new[] { 5, 3 });
+        }
+
+        return (boardSectionIndex, Array.Empty<int>());
+    }
+
 
     public static void CheckIllegalMove(Game game, int[] move, string whereDoIComeFrom = "")
     {
@@ -215,7 +339,7 @@ public static class BotUtils
             Console.WriteLine("Invalid move!" + whereDoIComeFrom);
         }
     }
-    
+
     public static async Task LogResultAsync(Game game)
     {
         var player = game.players.First(x => x.id == game.self);
@@ -254,7 +378,7 @@ public static class BotUtils
 
         return new[] { playSection, move };
     }
-    
+
     public static int[] WinField(Game game)
     {
         var forced = GetForced(game);
@@ -280,7 +404,7 @@ public static class BotUtils
 
         return new[] { playSection, move };
     }
-    
+
     private static int GetCriticalMove(string importantSymbol, params (int, string)[][] lines)
     {
         for (var index = 0; index < lines.Length; index++)
@@ -300,5 +424,47 @@ public static class BotUtils
         }
 
         return -1;
+    }
+
+    private static int GetCriticalMove(string importantSymbol, WinnableLines lines)
+    {
+        foreach (var line in lines)
+        {
+            var opCount = line.Count(x => x.Item2 == importantSymbol);
+            if (opCount < 2)
+                continue;
+
+            for (var i = 0; i < line.Length; i++)
+            {
+                var pos = line[i];
+                var symbol = pos.Item2;
+                if (string.IsNullOrWhiteSpace(symbol))
+                    return pos.Item1;
+            }
+        }
+
+        return -1;
+    }
+
+    public static bool HasClosingPosition(List<string> section, string symbol)
+    {
+        var winnableLines = new WinnableLines(section);
+        return GetCriticalMove(symbol, winnableLines) >= 0;
+    }
+
+    public static int[] GetNextBestMetaMove(string selfSymbol, string opponentSymbol, int sectionIndex, int[] positions,
+        Game game)
+    {
+        foreach (var position in positions)
+        {
+            var section = game.board[position];
+            if (HasClosingPosition(section, selfSymbol) || HasClosingPosition(section, opponentSymbol))
+                continue;
+            if (!string.IsNullOrWhiteSpace(game.overview[position]))
+                continue;
+            return new[] { sectionIndex, position };
+        }
+
+        return new[] { sectionIndex, positions[0] };
     }
 }
