@@ -13,7 +13,7 @@ public sealed class BotV4 : BackgroundService
             new SocketIOOptions { Transport = TransportProtocol.WebSocket });
 
         client.OnConnected += (sender, e) => Console.WriteLine("Connected");
-        client.On("disconnect", (e) => Console.WriteLine("Disconnected"));
+        client.OnDisconnected += (_, _) => Reconnect(client);
 
         await client.ConnectAsync();
 
@@ -48,6 +48,19 @@ public sealed class BotV4 : BackgroundService
         }
     }
 
+    private static void Reconnect(SocketIOClient.SocketIO client)
+    {
+        Console.WriteLine("Disconnected");
+        while (!client.Connected)
+        {
+            Task.Delay(5000).Wait();
+            Console.WriteLine("Attempting reconnect");
+            client.ConnectAsync().Wait();
+        }
+
+        Console.WriteLine("Reconnected!");
+    }
+
     private void Init(Game game)
     {
     }
@@ -65,59 +78,6 @@ public sealed class BotV4 : BackgroundService
 
     private static int[] GetMove(Game game)
     {
-        // Win
-        var resultWinField = BotUtils.WinField(game);
-        if (resultWinField.Length > 0)
-        {
-            BotUtils.CheckIllegalMove(game, resultWinField, "resultWinField");
-            Console.WriteLine("Board:" + resultWinField[0] + " Feld:" + resultWinField[1]);
-            return resultWinField;
-        }
-
-        // Block
-        var resultBlockOpponent = BotUtils.BlockOpponent(game);
-        if (resultBlockOpponent.Length > 0)
-        {
-            BotUtils.CheckIllegalMove(game, resultBlockOpponent, "resultBlockOpponent");
-            Console.WriteLine("Board:" + resultBlockOpponent[0] + " Feld:" + resultBlockOpponent[1]);
-            return resultBlockOpponent;
-        }
-
-        // First move
-        var (ourSymbol, enemySymbol) = BotUtils.GetPlayerSymbols(game);
-        var firstMove = BotUtils.FirstMove2(game);
-        if (firstMove.Positions.Length > 0)
-        {
-            var metaMove = BotUtils.GetNextBestMetaMove(ourSymbol, enemySymbol, firstMove.SectionIndex,
-                firstMove.Positions, game);
-            BotUtils.CheckIllegalMove(game, metaMove, "firstMove");
-            return metaMove;
-        }
-
-        // Second move
-        var secondMove = BotUtils.SecondMove2(game);
-        if (secondMove.Positions.Length > 0)
-        {
-            var metaMove = BotUtils.GetNextBestMetaMove(ourSymbol, enemySymbol, secondMove.SectionIndex,
-                secondMove.Positions, game);
-            var valueOfField = game.board[metaMove[0]][metaMove[1]];
-            if (valueOfField == "")
-            {
-                BotUtils.CheckIllegalMove(game, metaMove, "secondMove");
-                return metaMove;
-            }
-        }
-        
-        // Most efficient local move
-        
-
-        // Random fallback
-        var forced = BotUtils.GetForced(game);
-        var boardSectionIndex = BotUtils.GetRandomBoardSectionIndex(game, forced);
-        var boardIndex = BotUtils.GetRandomBoardMoveIndex(game, boardSectionIndex);
-        var move = new[] { boardSectionIndex, boardIndex };
-        Console.WriteLine("Board:" + move[0] + " Feld:" + move[1]);
-        BotUtils.CheckIllegalMove(game, move, "random move");
-        return move;
+        return new BotInstanceV4().DoMove(game);
     }
 }
