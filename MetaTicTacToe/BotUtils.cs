@@ -1,8 +1,11 @@
-﻿namespace MetaTicTacToe;
+﻿using System.Text;
+using System.Text.Json;
+
+namespace MetaTicTacToe;
 
 public static class BotUtils
 {
-    public static bool GetForcedUtils(Game game)
+    public static bool GetForced(Game game)
     {
         if (game.forcedSection.HasValue)
         {
@@ -16,7 +19,7 @@ public static class BotUtils
         return false;
     }
 
-    private static int GetBoardSectionIndexUtils(Game game, bool forced)
+    public static int GetRandomBoardSectionIndex(Game game, bool forced)
     {
         if (forced)
         {
@@ -37,7 +40,7 @@ public static class BotUtils
         return freeIndexes[random];
     }
     
-    private static int GetBoardMoveIndexUtils(Game game, int boardSectionIndex)
+    public static int GetRandomBoardMoveIndex(Game game, int boardSectionIndex)
     {
         int moveIndex = 0;
         var chosenBoard = game.board[boardSectionIndex];
@@ -57,7 +60,7 @@ public static class BotUtils
         return moveIndex;
     }
     
-    private static void CheckIllegalMoveUtils(Game game, int[] move)
+    public static void CheckIllegalMove(Game game, int[] move)
     {
         int idx1 = move[0];
         int idx2 = move[1];
@@ -69,5 +72,18 @@ public static class BotUtils
         {
             Console.WriteLine("Invalid move!");
         }
+    }
+    
+    public static async Task LogResultAsync(Game game)
+    {
+        var player = game.players.First(x => x.id == game.self);
+        bool win = player.score == 1;
+        Console.WriteLine($"Won game? {win}");
+        var exeDir = AppDomain.CurrentDomain.BaseDirectory;
+        var logPath = Path.Combine(exeDir, "games");
+        Directory.CreateDirectory(logPath);
+        var json = JsonSerializer.Serialize(game);
+        var filePath = Path.Combine(logPath, $"{game.id}.json");
+        await File.WriteAllTextAsync(filePath, json, Encoding.UTF8);
     }
 }
