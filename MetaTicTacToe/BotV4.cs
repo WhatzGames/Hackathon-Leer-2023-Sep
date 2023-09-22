@@ -65,6 +65,7 @@ public sealed class BotV4 : BackgroundService
 
     private static int[] GetMove(Game game)
     {
+        // Win
         var resultWinField = BotUtils.WinField(game);
         if (resultWinField.Length > 0)
         {
@@ -73,6 +74,7 @@ public sealed class BotV4 : BackgroundService
             return resultWinField;
         }
 
+        // Block
         var resultBlockOpponent = BotUtils.BlockOpponent(game);
         if (resultBlockOpponent.Length > 0)
         {
@@ -81,6 +83,7 @@ public sealed class BotV4 : BackgroundService
             return resultBlockOpponent;
         }
 
+        // First move
         var (ourSymbol, enemySymbol) = BotUtils.GetPlayerSymbols(game);
         var firstMove = BotUtils.FirstMove2(game);
         if (firstMove.Positions.Length > 0)
@@ -91,6 +94,7 @@ public sealed class BotV4 : BackgroundService
             return metaMove;
         }
 
+        // Second move
         var secondMove = BotUtils.SecondMove2(game);
         if (secondMove.Positions.Length > 0)
         {
@@ -103,7 +107,9 @@ public sealed class BotV4 : BackgroundService
                 return metaMove;
             }
         }
-
+        
+        // Most efficient local move
+        
 
         // Random fallback
         var forced = BotUtils.GetForced(game);
