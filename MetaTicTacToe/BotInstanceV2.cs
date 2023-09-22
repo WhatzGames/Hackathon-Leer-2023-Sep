@@ -97,9 +97,88 @@ public class BotInstanceV2 : IBotInstance
 
     private int[] WinField(Game game)
     {
-        //do stuff 
+        if (game.forcedSection is null)
+        {
+            return Array.Empty<int>();
+        }
+
+        var board = game.board[game.forcedSection.Value];
+        var player = game.players[0].symbol;
+
+        var position = -1;
+        for (int i = 0; i < 7; i+=3)
+        {
+            position = WinHorizontal(board, player, position);
+            if (position > 0)
+            {
+                return new[] {game.forcedSection.Value, position};
+            }
+        }
+
+        for (int i = 0; i < 3; i++)
+        {
+            position = WinVertical(board, player, 0);
+            if (position > 0)
+            {
+                return new[] {game.forcedSection.Value, position};
+            }
+        }
 
         return Array.Empty<int>();
+    }
+
+    private int WinHorizontal(List<string> board, string symbol, int position)
+    {
+        if (board[position] == symbol)
+        {
+            if (board[position + 1] == symbol)
+            {
+                return position + 2;
+            }
+
+            if (board[position + 2] == symbol)
+            {
+                return position + 1;
+            }
+
+            if (position is 0 && board[9] == symbol)
+            {
+                return 4;
+            }
+        }
+        
+        if (board[position + 1] == symbol)
+        {
+            if (board[position + 2] == symbol)
+            {
+                return position + 1;
+            }
+        }
+
+        return -1;
+    }
+    
+    private int WinVertical(List<string> board, string symbol, int position)
+    {
+        if (board[position] == symbol)
+        {
+            if (board[position + 3] == symbol)
+            {
+                return position + 6;
+            }
+
+            if (board[position + 6] == symbol)
+            {
+                return position + 3;
+            }
+
+            if (position is 6)
+            {
+                return 5;
+            }
+        }
+
+        return -1;
     }
 
     private int[] ChooseField(Game game)
