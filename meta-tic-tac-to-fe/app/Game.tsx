@@ -5,13 +5,18 @@ import ProgressBar from '@/app/ProgressBar';
 import EndScreen from '@/app/EndScreen';
 import Board from '@/app/Board';
 
-export default function Game({view = false}: { view?: boolean }) {
+type GameProps = {
+  view?: boolean;
+  onNewGame?: () => void;
+}
+
+export default function Game({view = false, onNewGame}: GameProps) {
   const game = useGameStore(state => state.game);
   const players = useGameStore(state => state.players);
 
   return (
     <>
-      <EndScreen/>
+      <EndScreen onNewGame={onNewGame}/>
       {!view &&
         <>
           <h1 className={'text-3xl text-center mb-12'}>JAckathon - Meta Tic-Tac-Toe</h1>

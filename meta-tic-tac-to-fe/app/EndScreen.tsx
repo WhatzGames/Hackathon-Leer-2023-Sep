@@ -1,7 +1,7 @@
 import {useProgressStore} from '@/app/progress-store';
 import {useGameStore} from '@/app/game-store';
 
-export default function EndScreen() {
+export default function EndScreen({onNewGame}: {onNewGame?: () => void}) {
   const progress = useProgressStore(state => state.progress);
   const winner = useGameStore(state => state.winner);
   const newGame = useGameStore(state => state.newGame);
@@ -14,6 +14,10 @@ export default function EndScreen() {
   const handleClick = () => {
     newGame();
     resetProgress();
+
+    if (onNewGame) {
+      onNewGame();
+    }
   };
 
   return (

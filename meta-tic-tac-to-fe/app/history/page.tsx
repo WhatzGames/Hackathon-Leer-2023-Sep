@@ -4,10 +4,12 @@ import {ChangeEvent, useEffect, useState} from 'react';
 import {PlayedGame} from '@/app/types';
 import Game from '@/app/Game';
 import {useGameStore} from '@/app/game-store';
+import {LucidePause, LucidePlay} from 'lucide-react';
 
 export default function HistoryPage() {
   const setField = useGameStore(state => state.setField);
   const setPlayers = useGameStore(state => state.setPlayers);
+  const [play, setPlay] = useState(false);
   const [playedGames, setPlayedGames] = useState<PlayedGame[]>([]);
   const [viewGame, setViewGame] = useState<PlayedGame | null>(null);
   const [step, setStep] = useState(0);
@@ -20,17 +22,29 @@ export default function HistoryPage() {
 
   useEffect(() => fetchPlayedGames(), []);
 
+  useEffect(() => {
+    let interval: ReturnType<typeof setInterval>;
+
+    if (play) {
+      interval = setInterval(() => {
+        nextStep(step);
+      }, 200);
+    }
+
+    return () => {
+      if (interval) {
+        clearInterval(interval);
+      }
+    }
+  }, [step, play]);
+
   const handleChange = (e: ChangeEvent<HTMLSelectElement>) => {
     const game = e.target.value ? playedGames.find(g => g.id === e.target.value)! : null;
     setViewGame(game);
-
-    if (game) {
-      game.players.find(p => p.id === game.self)!.name = 'JAckathon';
-      setPlayers(game?.players || [])
-    }
+    onNewGame(game);
   };
 
-  const nextStep = () => {
+  const nextStep = (step: number) => {
     if (!viewGame || step > (viewGame.log.length - 1)) {
       return;
     }
@@ -42,6 +56,20 @@ export default function HistoryPage() {
       setStep(nextStepIndex);
     }
   };
+
+  const onNewGame = (game: PlayedGame | null = null) => {
+    game = game || viewGame;
+
+    if (game) {
+      game.players.find(p => p.id === game!.self)!.name = 'JAckathon';
+      setPlayers(game?.players || []);
+      setStep(0);
+    }
+  }
+
+  const togglePlay = () => {
+    setPlay(prev => !prev);
+  }
 
   return (
     <main id={'history-page'} className={'min-w-[828px]'}>
@@ -57,11 +85,19 @@ export default function HistoryPage() {
           </select>
 
           {viewGame &&
-            <button type={'button'}
-                    className={'border border-slate-400 hover:bg-slate-200 rounded-xl p-4'}
-                    onClick={() => nextStep()}>
-              Weiter
-            </button>
+            <>
+              <button type={'button'}
+                      className={'border border-slate-400 hover:bg-slate-200 rounded-xl p-4'}
+                      onClick={togglePlay}>
+                {play ? <LucidePause/> :<LucidePlay/>}
+              </button>
+              <button type={'button'}
+                      className={'border border-slate-400 hover:bg-slate-200 disabled:opacity-70 rounded-xl p-4'}
+                      onClick={() => nextStep(step)}
+                      disabled={play}>
+                Weiter
+              </button>
+            </>
           }
         </div>
 
@@ -71,7 +107,7 @@ export default function HistoryPage() {
         </button>
       </div>
 
-      {viewGame && <Game view/>}
+      {viewGame && <Game onNewGame={onNewGame} view/>}
     </main>
   );
 }
