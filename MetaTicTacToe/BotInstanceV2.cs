@@ -8,7 +8,7 @@ public class BotInstanceV2 : IBotInstance
     private string SelfSymbol { get; set; }
     private string OpponentSymbol { get; set; }
 
-    private int? ForcedSection { get; set; }
+    private int ForcedSection { get; set; }
 
     public BotInstanceV2()
     {
@@ -25,18 +25,23 @@ public class BotInstanceV2 : IBotInstance
         OpponentSymbol = game.players.Where(x => x.id != SelfId)
             .Select(y => y.symbol).ToString()!;
 
-        ForcedSection = game.forcedSection;
+        if(BotUtils.GetForced(game))
+            ForcedSection = game.forcedSection!.Value;
+        else
+        {
+            ForcedSection = GetFirstFreeId(game.overview);
+        }
 
 
         var resultWinField = WinField(game);
-        if (!(resultWinField.Length >= 1))
+        if ((resultWinField.Length >= 1))
         {
             BotUtils.CheckIllegalMove(game, resultWinField);
             return resultWinField;
         }
 
         var resultBlockOpponent = BlockOpponent(game);
-        if (!(resultBlockOpponent.Length >= 1))
+        if ((resultBlockOpponent.Length >= 1))
         {
             BotUtils.CheckIllegalMove(game, resultBlockOpponent);
             return resultBlockOpponent;
@@ -49,11 +54,7 @@ public class BotInstanceV2 : IBotInstance
 
     private int[] BlockOpponent(Game game)
     {
-        int playSection = 0;
-        if (game.forcedSection is not null)
-            playSection = game.forcedSection.Value;
-
-        var section = game.board[playSection];
+        var section = game.board[ForcedSection];
         var row0 = new[] { (0, section[0]), (1, section[1]), (2, section[2]) };
         var row1 = new[] { (3, section[3]), (4, section[4]), (5, section[5]) };
         var row2 = new[] { (6, section[6]), (7, section[7]), (8, section[8]) };
@@ -70,7 +71,7 @@ public class BotInstanceV2 : IBotInstance
         if (move is -1)
             return Array.Empty<int>();
 
-        return new[] { playSection, move };
+        return new[] { ForcedSection, move };
     }
 
     private int GetCriticalMove(string importantSymbol, params (int, string)[][] lines)
@@ -96,11 +97,7 @@ public class BotInstanceV2 : IBotInstance
 
     private int[] WinField(Game game)
     {
-        int playSection = 0;
-        if (game.forcedSection is not null)
-            playSection = game.forcedSection.Value;
-
-        var section = game.board[playSection];
+        var section = game.board[ForcedSection];
         var row0 = new[] { (0, section[0]), (1, section[1]), (2, section[2]) };
         var row1 = new[] { (3, section[3]), (4, section[4]), (5, section[5]) };
         var row2 = new[] { (6, section[6]), (7, section[7]), (8, section[8]) };
@@ -117,18 +114,12 @@ public class BotInstanceV2 : IBotInstance
         if (move is -1)
             return Array.Empty<int>();
 
-        return new[] { playSection, move };
+        return new[] { ForcedSection, move };
     }
 
     private int[] ChooseField(Game game)
     {
-        int playSection = -1;
-        if (BotUtils.GetForced(game))
-            playSection = game.forcedSection!.Value;
-        if (playSection is -1)
-            playSection = GetFirstFreeId(game.overview);
-        
-        return new []{playSection, GetFirstFreeId(game.board[playSection])};
+        return new []{ForcedSection, GetFirstFreeId(game.board[ForcedSection])};
     }
 
     private int GetFirstFreeId(List<string> board)
