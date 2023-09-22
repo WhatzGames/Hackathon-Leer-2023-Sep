@@ -552,8 +552,14 @@ public static class BotUtils
     public static async Task LogResultAsync(Game game)
     {
         var player = game.players.First(x => x.id == game.self);
-        bool win = player.score == 1;
-        Console.WriteLine($"Won game? {win}");
+        var enemy = game.players.First(x => x.id != game.self);
+        var win = player.score switch
+        {
+            1 => "WON!",
+            0 when enemy.score is 1 => "LOST! :(",
+            _ => "STALEMATE!"
+        };
+        Console.WriteLine($"Game Result: {win}");
         var exeDir = AppDomain.CurrentDomain.BaseDirectory;
         var logPath = Path.Combine(exeDir, "games");
         Directory.CreateDirectory(logPath);
