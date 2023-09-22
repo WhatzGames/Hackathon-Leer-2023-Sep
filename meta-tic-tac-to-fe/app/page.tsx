@@ -18,7 +18,9 @@ export default function Game() {
       <h2 className={'text-2xl text-center mb-4'}>Spieler {player.toUpperCase()}, du bist dran!</h2>
 
       <div className={'flex'}>
-        {/*<ProgressBar/>*/}
+        <div id={'progress-bar'} className={'mr-8'}>
+          <ProgressBar/>
+        </div>
         <div className={'grid grid-cols-3 grid-rows-3 gap-3'}>
           {game.map((board, index) => <Board key={index} boardNo={index} fields={board.fields}/>)}
         </div>
@@ -64,19 +66,19 @@ const ProgressBar = () => {
   const player = useGameStore(state => state.player);
   const {progress, tick, reset} = useProgressStore();
 
-  useEffect(() => {
+  /*useEffect(() => {
     const interval = setInterval(() => tick(), 50);
     return () => {
       clearInterval(interval);
     };
-  }, []);
+  },  []);*/
 
   useEffect(() => {
     reset();
   }, [player]);
 
   return (
-    <div className={'relative bg-gray-200 mx-2 rounded-lg'} style={{width: 12}}>
+    <div className={'relative bg-gray-200 mx-2 rounded-lg h-full'} style={{width: 12}}>
       <div className={'absolute bottom-0 rounded-lg bg-red-300 z-10'} style={{width: 12, height: `${progress}%`}}></div>
     </div>
   );
@@ -93,16 +95,20 @@ const Board = ({boardNo, fields}: BoardProps) => {
   const winner = finishedBoards[boardNo];
 
   return (
-    <div className={'relative'}>
-      {winner &&
-        <div
-          className={'text-6xl text-red-500 absolute bg-slate-700/60 w-full h-full flex justify-center items-center'}>
-          {winner}
+    <div className={cn(
+      'relative transition-all',
+      activeBoard !== boardNo ? (activeBoard === null && !winner ? 'scale-100' : 'scale-90') : 'scale-110'
+    )}>
+      {(winner || (activeBoard !== null && activeBoard !== boardNo)) &&
+        <div className={cn(
+          'text-6xl text-red-white absolute bg-slate-700/60 w-full h-full flex justify-center',
+          'items-center shadow-xl'
+        )}>
+          <span>{winner}</span>
         </div>
       }
       <div className={cn(
         'grid grid-cols-3 grid-rows-3 gap-1',
-        activeBoard === boardNo && 'border-2 border-red-600',
         winner && 'border-red-950'
       )}>
         {fields.map((field, index) => <Field key={index} board={boardNo} field={index}>{field}</Field>)}
@@ -118,7 +124,7 @@ type FieldProps = {
   height?: number;
 }
 
-const Field = ({board, field, width = 60, height = 60, children}: React.PropsWithChildren<FieldProps>) => {
+const Field = ({board, field, width = 80, height = 80, children}: React.PropsWithChildren<FieldProps>) => {
   const setField = useGameStore(state => state.setField);
 
   const handleClick = () => setField(board, field);
