@@ -2,7 +2,7 @@
 
 public interface IBotInstance
 {
-    public void DoMove(Game game);
+    public int[] DoMove(Game game);
 }
 public class BotInstance : IBotInstance
 {
@@ -11,7 +11,7 @@ public class BotInstance : IBotInstance
         
     }
     
-    public void DoMove(Game game)
+    public int[] DoMove(Game game)
     {
         throw new NotImplementedException();
     }
