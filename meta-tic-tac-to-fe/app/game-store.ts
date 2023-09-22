@@ -1,17 +1,14 @@
+'use client';
+
 import {create} from 'zustand';
 import {v4 as randomUUID} from 'uuid';
-
-type Game = Board[];
-type Board = {
-  id: string;
-  fields: (Player | null)[];
-};
-type Player = 'X' | 'O';
+import {Board, Game, Player, PlayerSymbol} from '@/app/types';
 
 type GameState = {
-  player: Player;
+  players: Player[];
+  activePlayer: string;
   activeBoard: number | null;
-  finishedBoards: (Player | null)[];
+  overview: (PlayerSymbol | null)[];
   game: Game;
 }
 
@@ -21,7 +18,7 @@ type GameActions = {
   newGame: () => void;
 }
 
-const checkBoard = ({fields}: Board): Player | null => {
+const checkBoard = ({fields}: Board): PlayerSymbol | null => {
   const combinations = [
     [0, 1, 2],
     [3, 4, 5],
@@ -46,22 +43,30 @@ const checkBoard = ({fields}: Board): Player | null => {
   return null;
 };
 
-const initialState = (): GameState => ({
-  player: 'X',
-  activeBoard: null,
-  finishedBoards: [null, null, null, null, null, null, null, null, null],
-  game: [
-    {id: randomUUID(), fields: [null, null, null, null, null, null, null, null, null]},
-    {id: randomUUID(), fields: [null, null, null, null, null, null, null, null, null]},
-    {id: randomUUID(), fields: [null, null, null, null, null, null, null, null, null]},
-    {id: randomUUID(), fields: [null, null, null, null, null, null, null, null, null]},
-    {id: randomUUID(), fields: [null, null, null, null, null, null, null, null, null]},
-    {id: randomUUID(), fields: [null, null, null, null, null, null, null, null, null]},
-    {id: randomUUID(), fields: [null, null, null, null, null, null, null, null, null]},
-    {id: randomUUID(), fields: [null, null, null, null, null, null, null, null, null]},
-    {id: randomUUID(), fields: [null, null, null, null, null, null, null, null, null]},
-  ]
-});
+const initialState = (): GameState => {
+  const players: Player[] = [
+    {id: '1', symbol: 'X', score: 0},
+    {id: '2', symbol: 'O', score: 0},
+  ];
+
+  return {
+    players,
+    activePlayer: players.at(0)!.id,
+    activeBoard: null,
+    overview: [null, null, null, null, null, null, null, null, null],
+    game: [
+      {id: randomUUID(), fields: [null, null, null, null, null, null, null, null, null]},
+      {id: randomUUID(), fields: [null, null, null, null, null, null, null, null, null]},
+      {id: randomUUID(), fields: [null, null, null, null, null, null, null, null, null]},
+      {id: randomUUID(), fields: [null, null, null, null, null, null, null, null, null]},
+      {id: randomUUID(), fields: [null, null, null, null, null, null, null, null, null]},
+      {id: randomUUID(), fields: [null, null, null, null, null, null, null, null, null]},
+      {id: randomUUID(), fields: [null, null, null, null, null, null, null, null, null]},
+      {id: randomUUID(), fields: [null, null, null, null, null, null, null, null, null]},
+      {id: randomUUID(), fields: [null, null, null, null, null, null, null, null, null]},
+    ]
+  }
+}
 
 export const useGameStore = create<GameState & GameActions>((set, get) => ({
   ...initialState(),
@@ -73,8 +78,8 @@ export const useGameStore = create<GameState & GameActions>((set, get) => ({
     }
 
     // Board finished - not allowed
-    const finishedBoards = get().finishedBoards;
-    if (finishedBoards[board] !== null) {
+    const overview = get().overview;
+    if (overview[board] !== null) {
       return;
     }
 
@@ -85,28 +90,30 @@ export const useGameStore = create<GameState & GameActions>((set, get) => ({
     }
 
     // Set field to player
-    game[board].fields[field] = get().player;
+    const players = get().players;
+    const activePlayerIndex = players.findIndex(player => player.id === get().activePlayer);
+    game[board].fields[field] = players[activePlayerIndex].symbol;
 
     const winner = checkBoard(game[board]);
     if (winner) {
-      finishedBoards[board] = winner;
+      overview[board] = winner;
     }
 
     // Set new active to last field, otherwise allow random choice
-    activeBoard = finishedBoards[field] != null ? null : field;
+    activeBoard = overview[field] != null ? null : field;
 
     set((state) => ({
       ...state,
-      player: state.player === 'X' ? 'O' : 'X',
+      activePlayer: activePlayerIndex === 0 ? players[1].id : players[0].id,
       activeBoard,
-      finishedBoards,
+      overview: overview,
       game
     }));
   },
   switchPlayer() {
     set((state) => ({
       ...state,
-      player: state.player === 'X' ? 'O' : 'X',
+      activePlayer: state.activePlayer === 'X' ? 'O' : 'X',
     }));
   },
   newGame() {
