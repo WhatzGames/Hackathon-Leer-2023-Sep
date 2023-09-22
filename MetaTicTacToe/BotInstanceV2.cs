@@ -51,16 +51,16 @@ public class BotInstanceV2 : IBotInstance
             playSection = game.forcedSection.Value;
 
         var section = game.board[playSection];
-        var row0 = new[] { section[0], section[1], section[2] };
-        var row1 = new[] { section[3], section[4], section[5] };
-        var row2 = new[] { section[6], section[7], section[8] };
+        var row0 = new[] { (0, section[0]), (1, section[1]), (2, section[2]) };
+        var row1 = new[] { (3, section[3]), (4, section[4]), (5, section[5]) };
+        var row2 = new[] { (6, section[6]), (7, section[7]), (8, section[8]) };
 
-        var col0 = new[] { section[0], section[3], section[6] };
-        var col1 = new[] { section[1], section[4], section[7] };
-        var col2 = new[] { section[2], section[5], section[8] };
+        var col0 = new[] { (0, section[0]), (3, section[3]), (6, section[6]) };
+        var col1 = new[] { (1, section[1]), (4, section[4]), (7, section[7]) };
+        var col2 = new[] { (2, section[2]), (5, section[5]), (8, section[8]) };
 
-        var dia0 = new[] { section[0], section[4], section[8] };
-        var dia1 = new[] { section[6], section[4], section[2] };
+        var dia0 = new[] { (0, section[0]), (4, section[4]), (8, section[8]) };
+        var dia1 = new[] { (6, section[6]), (4, section[4]), (2, section[2]) };
 
         int move = GetBlockingMove(otherSymbol, row0, row1, row2, col0, col1, col2, dia0, dia1);
 
@@ -70,21 +70,22 @@ public class BotInstanceV2 : IBotInstance
         return new[] { playSection, move };
     }
 
-    private int GetBlockingMove(string opponentSymbol, params string[][] lines)
+    private int GetBlockingMove(string opponentSymbol, params (int, string)[][] lines)
     {
         for (var index = 0; index < lines.Length; index++)
         {
             var line = lines[index];
-            if (!line.Contains(opponentSymbol))
+            if (line.All(x => x.Item2 != opponentSymbol))
                 continue;
 
             bool wasLastSymbolOpponent = false;
             for (var i = 0; i < line.Length; i++)
             {
-                var symbol = line[i];
+                var pos = line[i];
+                var symbol = pos.Item2;
                 if (symbol == opponentSymbol && wasLastSymbolOpponent)
                 {
-                    return index+i ;
+                    return pos.Item1;
                 }
 
                 if (symbol == opponentSymbol)
