@@ -29,18 +29,22 @@ public class BotInstanceV2 : IBotInstance
 
 
         var resultWinField = WinField(game);
-        if (resultWinField.Length < 1)
+        if (!(resultWinField.Length >= 1))
         {
-            return Array.Empty<int>();
+            BotUtils.CheckIllegalMove(game, resultWinField);
+            return resultWinField;
         }
 
         var resultBlockOpponent = BlockOpponent(game);
-        if (resultBlockOpponent.Length < 1)
+        if (!(resultBlockOpponent.Length >= 1))
         {
-            return Array.Empty<int>();
+            BotUtils.CheckIllegalMove(game, resultBlockOpponent);
+            return resultBlockOpponent;
         }
 
-        return ChooseField(game);
+        var move = ChooseField(game);
+        BotUtils.CheckIllegalMove(game, move);
+        return move;
     }
 
     private int[] BlockOpponent(Game game)
@@ -61,7 +65,7 @@ public class BotInstanceV2 : IBotInstance
         var dia0 = new[] { (0, section[0]), (4, section[4]), (8, section[8]) };
         var dia1 = new[] { (6, section[6]), (4, section[4]), (2, section[2]) };
 
-        int move = GetBlockingMove(row0, row1, row2, col0, col1, col2, dia0, dia1);
+        int move = GetCriticalMove(OpponentSymbol,row0, row1, row2, col0, col1, col2, dia0, dia1);
 
         if (move is -1)
             return Array.Empty<int>();
@@ -69,24 +73,21 @@ public class BotInstanceV2 : IBotInstance
         return new[] { playSection, move };
     }
 
-    private int GetBlockingMove(params (int, string)[][] lines)
+    private int GetCriticalMove(string importantSymbol, params (int, string)[][] lines)
     {
         for (var index = 0; index < lines.Length; index++)
         {
             var line = lines[index];
-            if (line.All(x => x.Item2 != OpponentSymbol))
+            var opCount = line.Count(x => x.Item2 == importantSymbol);
+            if (opCount<2)
                 continue;
 
-            bool wasLastSymbolOpponent = false;
             for (var i = 0; i < line.Length; i++)
             {
                 var pos = line[i];
                 var symbol = pos.Item2;
-                if (symbol == OpponentSymbol && wasLastSymbolOpponent)
+                if (string.IsNullOrWhiteSpace(symbol))
                     return pos.Item1;
-
-                if (symbol == OpponentSymbol)
-                    wasLastSymbolOpponent = true;
             }
         }
 
@@ -111,36 +112,12 @@ public class BotInstanceV2 : IBotInstance
         var dia0 = new[] { (0, section[0]), (4, section[4]), (8, section[8]) };
         var dia1 = new[] { (6, section[6]), (4, section[4]), (2, section[2]) };
 
-        int move = GetWinningMove(row0, row1, row2, col0, col1, col2, dia0, dia1);
+        int move = GetCriticalMove(SelfSymbol, row0, row1, row2, col0, col1, col2, dia0, dia1);
 
         if (move is -1)
             return Array.Empty<int>();
 
         return new[] { playSection, move };
-    }
-
-    private int GetWinningMove(params (int, string)[][] lines)
-    {
-        for (var index = 0; index < lines.Length; index++)
-        {
-            var line = lines[index];
-            if (line.All(x => x.Item2 != SelfSymbol))
-                continue;
-
-            bool wasLastSymbolSelf = false;
-            for (var i = 0; i < line.Length; i++)
-            {
-                var pos = line[i];
-                var symbol = pos.Item2;
-                if (symbol == SelfSymbol && wasLastSymbolSelf)
-                    return pos.Item1;
-
-                if (symbol == SelfSymbol)
-                    wasLastSymbolSelf = true;
-            }
-        }
-
-        return -1;
     }
 
     private int[] ChooseField(Game game)
