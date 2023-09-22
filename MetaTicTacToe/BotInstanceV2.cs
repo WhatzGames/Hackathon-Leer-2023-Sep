@@ -4,6 +4,12 @@ namespace MetaTicTacToe;
 
 public class BotInstanceV2 : IBotInstance
 {
+    private string SelfId { get; set; }
+    private string SelfSymbol { get; set; }
+    private string OpponentSymbol { get; set; }
+    
+    private int? ForcedSection { get; set; }
+    
     public BotInstanceV2()
     {
         
@@ -11,6 +17,19 @@ public class BotInstanceV2 : IBotInstance
 
     public int[] DoMove(Game game)
     {
+        //set game properties
+        SelfId = game.self;
+        
+        SelfSymbol = game.players.Where(x => x.id == SelfId)
+                         .Select(y => y.symbol).ToString()!;
+        
+        OpponentSymbol = game.players.Where(x => x.id != SelfId)
+                             .Select(y => y.symbol).ToString()!;
+
+        ForcedSection = game.forcedSection;
+        
+        
+        
         var resultWinField = WinField(game);
         if (resultWinField.Length < 1)
         {
@@ -18,7 +37,7 @@ public class BotInstanceV2 : IBotInstance
         }
         
         var resultBlockOpponent = BlockOpponent(game);
-        if (resultBlockOpponent.Length <1)
+        if (resultBlockOpponent.Length < 1)
         {
             return Array.Empty<int>();
         }
