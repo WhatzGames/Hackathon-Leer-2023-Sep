@@ -141,7 +141,22 @@ public class BotInstanceV2 : IBotInstance
                 return position + 1;
             }
 
-            if (position is 0 && board[9] == symbol)
+            if (position is 0 && board[4] == symbol)
+            {
+                return 8;
+            }
+            
+            if (position is 0 && board[8] == symbol)
+            {
+                return 4;
+            }
+
+            if (position is 6 && board[4] == symbol)
+            {
+                return 2;
+            }
+            
+            if (position is 6 && board[8] == symbol)
             {
                 return 4;
             }
@@ -151,7 +166,7 @@ public class BotInstanceV2 : IBotInstance
         {
             if (board[position + 2] == symbol)
             {
-                return position + 1;
+                return position;
             }
         }
 
@@ -171,10 +186,13 @@ public class BotInstanceV2 : IBotInstance
             {
                 return position + 3;
             }
-
-            if (position is 6)
+        }
+        
+        if (board[position + 3] == symbol)
+        {
+            if (board[position + 6] == symbol)
             {
-                return 5;
+                return position;
             }
         }
 
