@@ -1,6 +1,10 @@
 ﻿namespace MetaTicTacToe;
 
-public class BotInstance
+public interface IBotInstance
+{
+    public void DoMove();
+}
+public class BotInstance : IBotInstance
 {
     public BotInstance()
     {
@@ -8,4 +12,8 @@ public class BotInstance
     }
     //TODO: jeder bot braucht eine speicherung der boards
 
+    public void DoMove()
+    {
+        throw new NotImplementedException();
+    }
 }
