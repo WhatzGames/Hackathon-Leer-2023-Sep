@@ -35,4 +35,4 @@ export type {
   Player,
   PlayedGame,
   PlayerSymbol
-}
+};

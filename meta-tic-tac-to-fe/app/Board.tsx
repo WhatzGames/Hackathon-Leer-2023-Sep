@@ -19,7 +19,7 @@ export default function Board({boardNo, fields}: BoardProps) {
     )}>
       {(winner || (activeBoard !== null && activeBoard !== boardNo)) &&
         <div className={cn(
-          'text-6xl text-red-white absolute bg-slate-700/60 w-full h-full flex justify-center',
+          'text-6xl text-red-white absolute bg-slate-700/60 w-full h-full flex justify-center rounded-lg',
           'items-center shadow-xl'
         )}>
           <span>{winner}</span>

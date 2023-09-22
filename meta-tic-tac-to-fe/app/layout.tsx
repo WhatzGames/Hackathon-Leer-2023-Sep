@@ -17,7 +17,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="de">
-    <body className={cn(font.className, 'w-screen h-screen flex justify-center items-center')}>
+    <body className={cn(font.className, 'w-screen h-screen flex justify-center py-4')}>
     {children}
     </body>
     </html>

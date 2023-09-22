@@ -3,7 +3,6 @@
 import {ChangeEvent, useEffect, useState} from 'react';
 import {PlayedGame} from '@/app/types';
 import Game from '@/app/Game';
-import {next} from 'sucrase/dist/types/parser/tokenizer';
 import {useGameStore} from '@/app/game-store';
 
 export default function HistoryPage() {
@@ -16,13 +15,13 @@ export default function HistoryPage() {
     fetch('http://localhost:3000/api/history')
       .then(res => res.json())
       .then(games => setPlayedGames(games));
-  }
+  };
 
   useEffect(() => fetchPlayedGames(), []);
 
   const handleChange = (e: ChangeEvent<HTMLSelectElement>) => {
     setViewGame(e.target.value ? playedGames.find(g => g.id === e.target.value)! : null);
-  }
+  };
 
   const nextStep = () => {
     if (!viewGame || step > (viewGame.log.length - 1)) {
@@ -35,16 +34,16 @@ export default function HistoryPage() {
     if (nextStepIndex < viewGame.log.length) {
       setStep(nextStepIndex);
     }
-  }
+  };
 
   return (
-    <main id={'history-page'} className={'h-screen py-4 min-w-[828px]'}>
+    <main id={'history-page'} className={'min-w-[828px]'}>
       <h1 className={'text-3xl mb-4'}>Historie</h1>
 
       <div className="w-full flex justify-between mb-4">
         <div className="flex gap-2">
           <select value={viewGame?.id}
-                  className={'border border-slate-400 p-4 bg-white rounded-xl'}
+                  className={'border border-slate-400 hover:bg-slate-200 p-4 bg-white rounded-xl'}
                   onChange={handleChange}>
             <option value="">Such dir was aus...</option>
             {playedGames.map(p => <option key={p.id} value={p.id}>{p.id}</option>)}
@@ -59,7 +58,8 @@ export default function HistoryPage() {
           }
         </div>
 
-        <button type={'button'} className={'border border-slate-400 hover:bg-slate-200 rounded-xl p-4'} onClick={() => fetchPlayedGames()}>
+        <button type={'button'} className={'border border-slate-400 hover:bg-slate-200 rounded-xl p-4'}
+                onClick={() => fetchPlayedGames()}>
           Neu laden
         </button>
       </div>

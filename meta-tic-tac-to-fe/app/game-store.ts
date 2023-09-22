@@ -7,9 +7,9 @@ import {Field, Game, PlayedGame, Player, PlayerSymbol} from '@/app/types';
 type GameState = {
   game: Game;
   players: Player[];
+  activePlayer: string;
   playedGame: PlayedGame | null;
   winner: PlayerSymbol | null;
-  activePlayer: string;
   activeBoard: number | null;
   overview: Field[];
 }
@@ -69,19 +69,11 @@ const initialState = (): GameState => {
     activePlayer: players.at(0)!.id,
     activeBoard: null,
     overview: [null, null, null, null, null, null, null, null, null],
-  }
-}
+  };
+};
 
 export const useGameStore = create<GameState & GameActions>((set, get) => ({
   ...initialState(),
-  load(playedGame: PlayedGame) {
-    set((state) => ({
-      ...state,
-      players: playedGame.players,
-      activePlayer: playedGame.players.at(0)!.id,
-      playedGame
-    }));
-  },
   setField(board: number, field: number) {
     // board not active - not allowed
     let activeBoard = get().activeBoard;

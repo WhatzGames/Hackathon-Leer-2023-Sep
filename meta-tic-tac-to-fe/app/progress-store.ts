@@ -25,6 +25,6 @@ export const useProgressStore = create<ProgressStore>((set, get) => ({
     set((state) => ({
       ...state,
       progress: 100
-    }))
+    }));
   }
 }));
