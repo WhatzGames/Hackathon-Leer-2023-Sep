@@ -7,6 +7,7 @@ import {useGameStore} from '@/app/game-store';
 
 export default function HistoryPage() {
   const setField = useGameStore(state => state.setField);
+  const setPlayers = useGameStore(state => state.setPlayers);
   const [playedGames, setPlayedGames] = useState<PlayedGame[]>([]);
   const [viewGame, setViewGame] = useState<PlayedGame | null>(null);
   const [step, setStep] = useState(0);
@@ -20,7 +21,13 @@ export default function HistoryPage() {
   useEffect(() => fetchPlayedGames(), []);
 
   const handleChange = (e: ChangeEvent<HTMLSelectElement>) => {
-    setViewGame(e.target.value ? playedGames.find(g => g.id === e.target.value)! : null);
+    const game = e.target.value ? playedGames.find(g => g.id === e.target.value)! : null;
+    setViewGame(game);
+
+    if (game) {
+      game.players.find(p => p.id === game.self)!.name = 'JAckathon';
+      setPlayers(game?.players || [])
+    }
   };
 
   const nextStep = () => {

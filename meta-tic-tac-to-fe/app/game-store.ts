@@ -2,13 +2,12 @@
 
 import {create} from 'zustand';
 import {v4 as randomUUID} from 'uuid';
-import {Field, Game, PlayedGame, Player, PlayerSymbol} from '@/app/types';
+import {Field, Game, Player, PlayerSymbol} from '@/app/types';
 
 type GameState = {
   game: Game;
   players: Player[];
   activePlayer: string;
-  playedGame: PlayedGame | null;
   winner: PlayerSymbol | null;
   activeBoard: number | null;
   overview: Field[];
@@ -16,6 +15,7 @@ type GameState = {
 
 type GameActions = {
   setField: (board: number, field: number) => void;
+  setPlayers: (players: Player[]) => void;
   switchPlayer: () => void;
   newGame: () => void;
 }
@@ -63,7 +63,6 @@ const initialState = (): GameState => {
       {id: randomUUID(), fields: [null, null, null, null, null, null, null, null, null]},
       {id: randomUUID(), fields: [null, null, null, null, null, null, null, null, null]},
     ],
-    playedGame: null,
     winner: null,
     players,
     activePlayer: players.at(0)!.id,
@@ -120,6 +119,13 @@ export const useGameStore = create<GameState & GameActions>((set, get) => ({
       game,
       winner: gameWinner
     }));
+  },
+  setPlayers(players: Player[]) {
+    set((state) => ({
+      ...state,
+      players,
+      activePlayer: players.at(0)!.id
+    }))
   },
   switchPlayer() {
     set((state) => ({

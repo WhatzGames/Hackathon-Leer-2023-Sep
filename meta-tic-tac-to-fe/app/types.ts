@@ -12,6 +12,7 @@ type PlayerSymbol = 'X' | 'O';
 
 type Player = {
   id: PlayerId;
+  name?: string;
   symbol: PlayerSymbol;
   score: number;
 };

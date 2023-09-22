@@ -5,9 +5,10 @@ import Field from '@/app/Field';
 type BoardProps = {
   boardNo: number;
   fields: (string | null)[];
+  view?: boolean;
 }
 
-export default function Board({boardNo, fields}: BoardProps) {
+export default function Board({boardNo, fields, view = false}: BoardProps) {
   const activeBoard = useGameStore(state => state.activeBoard);
   const finishedBoards = useGameStore(state => state.overview);
   const winner = finishedBoards[boardNo];
@@ -29,7 +30,9 @@ export default function Board({boardNo, fields}: BoardProps) {
         'grid grid-cols-3 grid-rows-3 gap-1',
         winner && 'border-red-950'
       )}>
-        {fields.map((field, index) => <Field key={index} board={boardNo} field={index}>{field}</Field>)}
+        {fields.map((field, index) => (
+          <Field key={index} board={boardNo} field={index} view={view}>{field}</Field>
+        ))}
       </div>
     </div>
   );
