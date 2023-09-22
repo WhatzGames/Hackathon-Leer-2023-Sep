@@ -69,9 +69,7 @@ public sealed class Bot : BackgroundService
         var boardSectionIndex = GetBoardSectionIndex(game, forced);
         var boardMoveIndex = GetBoardMoveIndex(game, boardSectionIndex);
         var move = new int[] { boardSectionIndex, boardMoveIndex };
-
-        // CheckIllegalMove();
-        
+        CheckIllegalMove(game, move);
         await response.CallbackAsync(move);
     }
 
@@ -134,6 +132,14 @@ public sealed class Bot : BackgroundService
     {
         int idx1 = move[0];
         int idx2 = move[1];
+
+        bool idx1Valid = game.overview[idx1] == "";
+        bool idx2Valid = game.board[idx1][idx2] == "";
+
+        if (!idx1Valid || !idx2Valid)
+        {
+            Console.WriteLine("Invalid move!");
+        }
     }
 
     private async Task LogResultAsync(Game game)
