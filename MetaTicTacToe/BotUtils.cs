@@ -202,7 +202,7 @@ public static class BotUtils
 
     }
 
-    public static void CheckIllegalMove(Game game, int[] move)
+    public static void CheckIllegalMove(Game game, int[] move, string whereDoIComeFrom = "")
     {
         int idx1 = move[0];
         int idx2 = move[1];
@@ -212,7 +212,7 @@ public static class BotUtils
 
         if (!idx1Valid || !idx2Valid)
         {
-            Console.WriteLine("Invalid move!");
+            Console.WriteLine("Invalid move!" + whereDoIComeFrom);
         }
     }
     

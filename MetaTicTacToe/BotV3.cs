@@ -68,7 +68,7 @@ public sealed class BotV3 : BackgroundService
         var resultWinField = BotUtils.WinField(game);
         if (resultWinField.Length > 0)
         {
-            BotUtils.CheckIllegalMove(game, resultWinField);
+            BotUtils.CheckIllegalMove(game, resultWinField, "resultWinField");
             Console.WriteLine("Board:" + resultWinField[0] + " Feld:" + resultWinField[1]);
             return resultWinField;
         }
@@ -76,7 +76,7 @@ public sealed class BotV3 : BackgroundService
         var resultBlockOpponent = BotUtils.BlockOpponent(game);
         if (resultBlockOpponent.Length > 0)
         {
-            BotUtils.CheckIllegalMove(game, resultBlockOpponent);
+            BotUtils.CheckIllegalMove(game, resultBlockOpponent, "resultBlockOpponent");
             Console.WriteLine("Board:" + resultBlockOpponent[0] + " Feld:" + resultBlockOpponent[1]);
             return resultBlockOpponent;
         }
@@ -84,7 +84,7 @@ public sealed class BotV3 : BackgroundService
         var firstMove = BotUtils.FirstMove(game);
         if (firstMove.Length > 0)
         {
-            BotUtils.CheckIllegalMove(game, firstMove);
+            BotUtils.CheckIllegalMove(game, firstMove, "firstMove");
             Console.WriteLine("Board:" + firstMove[0] + " Feld:" + firstMove[1]);
             return firstMove;
         }
@@ -92,20 +92,26 @@ public sealed class BotV3 : BackgroundService
         var secondMove = BotUtils.SecondMove(game);
         if (secondMove.Length > 0)
         {
-            BotUtils.CheckIllegalMove(game, secondMove);
-            Console.WriteLine("Board:" + secondMove[0] + " Feld:" + secondMove[1]);
-            return secondMove;
+            var valueOfField = game.board[secondMove[0]][secondMove[1]];
+            if (valueOfField == "")
+            {
+                BotUtils.CheckIllegalMove(game, secondMove, "secondMove");
+                Console.WriteLine("Board:" + secondMove[0] + " Feld:" + secondMove[1]);
+                return secondMove;
+            }
+
+
         }
-        
-        
-        
+
+
+
         // Random fallback
         var forced = BotUtils.GetForced(game);
         var boardSectionIndex = BotUtils.GetRandomBoardSectionIndex(game, forced);
         var boardIndex = BotUtils.GetRandomBoardMoveIndex(game, boardSectionIndex);
         var move = new[] {boardSectionIndex, boardIndex};
         Console.WriteLine("Board:" + move[0] + " Feld:" + move[1]);
-        BotUtils.CheckIllegalMove(game, move);
+        BotUtils.CheckIllegalMove(game, move, "random move");
         return move;
     }
 }
