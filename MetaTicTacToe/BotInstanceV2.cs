@@ -1,16 +1,12 @@
 ﻿namespace MetaTicTacToe;
 
-public interface IBotInstance
+public class BotInstanceV2 : IBotInstance
 {
-    public void DoMove(Game game);
-}
-public class BotInstance : IBotInstance
-{
-    public BotInstance()
+    public BotInstanceV2()
     {
         
     }
-    
+
     public void DoMove(Game game)
     {
         throw new NotImplementedException();
