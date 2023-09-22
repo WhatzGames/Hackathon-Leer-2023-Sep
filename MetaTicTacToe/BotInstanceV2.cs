@@ -145,8 +145,23 @@ public class BotInstanceV2 : IBotInstance
 
     private int[] ChooseField(Game game)
     {
-        //do stuff 
+        int playSection = -1;
+        if (BotUtils.GetForced(game))
+            playSection = game.forcedSection!.Value;
+        if (playSection is -1)
+            playSection = GetFirstFreeId(game.overview);
+        
+        return new []{playSection, GetFirstFreeId(game.board[playSection])};
+    }
 
-        return Array.Empty<int>();
+    private int GetFirstFreeId(List<string> board)
+    {
+        for (int i = 0; i < board.Count; i++)
+        {
+            if (string.IsNullOrWhiteSpace(board[i]))
+                return i;
+        }
+
+        return 0;
     }
 }
