@@ -2,9 +2,7 @@
 
 import {create} from 'zustand';
 import {v4 as randomUUID} from 'uuid';
-import {Board, Field, Game, PlayedGame, Player, PlayerSymbol} from '@/app/types';
-import {Simulate} from 'react-dom/test-utils';
-import play = Simulate.play;
+import {Field, Game, PlayedGame, Player, PlayerSymbol} from '@/app/types';
 
 type GameState = {
   game: Game;
