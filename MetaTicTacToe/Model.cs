@@ -25,7 +25,7 @@ public class Log
 {
     public string player { get; set; }
 
-    public List<int?> move { get; set; }
+    public object move { get; set; }
 }
 
 public class Player
