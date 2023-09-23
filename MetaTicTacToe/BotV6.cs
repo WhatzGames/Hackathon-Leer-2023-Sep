@@ -134,7 +134,9 @@ public sealed class BotV6 : BackgroundService
         {
             //todo: hier beste metaboard choice durchführern und diese in den methoden übergeben
             var weightedMetaBoards = BotUtils.GetWeightedMetaBoards(game);
-            boardSectionIndex = weightedMetaBoards.First().BoardIndex;
+            var bestBoards = weightedMetaBoards.GroupBy(x => x.Weight).OrderByDescending(x => x.Key).First().ToArray();
+            var randomIndex = Random.Shared.Next(0, bestBoards.Length);
+            boardSectionIndex = bestBoards[randomIndex].BoardIndex;
         }
 
         // Win
