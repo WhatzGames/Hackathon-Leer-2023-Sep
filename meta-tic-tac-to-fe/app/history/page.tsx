@@ -38,6 +38,7 @@ export default function HistoryPage() {
         clearInterval(interval);
       }
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [step, play]);
 
   const handleChange = (e: ChangeEvent<HTMLSelectElement>) => {

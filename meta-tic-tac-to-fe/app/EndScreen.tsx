@@ -2,10 +2,6 @@ import {useProgressStore} from '@/app/progress-store';
 import {useGameStore} from '@/app/game-store';
 import {Button} from '@/components/Button';
 import {cn} from '@/lib/cn';
-import {Play} from 'lucide-react';
-import {Player} from '@/app/Player';
-import {Simulate} from 'react-dom/test-utils';
-import play = Simulate.play;
 
 export default function EndScreen({onNewGame}: {onNewGame?: () => void}) {
   const progress = useProgressStore(state => state.progress);
