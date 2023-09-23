@@ -5,6 +5,7 @@ import {PlayedGame} from '@/app/types';
 import Game from '@/app/Game';
 import {useGameStore} from '@/app/game-store';
 import {LucidePause, LucidePlay} from 'lucide-react';
+import {Button} from '@/components/Button';
 
 export default function HistoryPage() {
   const setField = useGameStore(state => state.setField);
@@ -58,6 +59,8 @@ export default function HistoryPage() {
   };
 
   const onNewGame = (game: PlayedGame | null = null) => {
+    setPlay(false);
+
     game = game || viewGame;
 
     if (game) {
@@ -86,25 +89,20 @@ export default function HistoryPage() {
 
           {viewGame &&
             <>
-              <button type={'button'}
-                      className={'border border-slate-400 hover:bg-slate-200 rounded-xl p-4'}
-                      onClick={togglePlay}>
+              <Button type={'button'} onClick={togglePlay}>
                 {play ? <LucidePause/> :<LucidePlay/>}
-              </button>
-              <button type={'button'}
-                      className={'border border-slate-400 hover:bg-slate-200 disabled:opacity-70 rounded-xl p-4'}
-                      onClick={() => nextStep(step)}
-                      disabled={play}>
+              </Button>
+              <Button type={'button'} onClick={() => nextStep(step)} disabled={play}>
                 Weiter
-              </button>
+              </Button>
             </>
           }
         </div>
 
-        <button type={'button'} className={'border border-slate-400 hover:bg-slate-200 rounded-xl p-4'}
+        <Button type={'button'}
                 onClick={() => fetchPlayedGames()}>
           Neu laden
-        </button>
+        </Button>
       </div>
 
       {viewGame && <Game onNewGame={onNewGame} view/>}

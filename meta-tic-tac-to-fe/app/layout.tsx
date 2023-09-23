@@ -1,9 +1,9 @@
 import './globals.css';
 import type {Metadata} from 'next';
-import {Josefin_Sans} from 'next/font/google';
+import {Acme, Josefin_Sans} from 'next/font/google';
 import {cn} from '@/lib/cn';
 
-const font = Josefin_Sans({subsets: ['latin'], weight: ['400', '600']});
+const font = Acme({subsets: ['latin'], weight: ['400']});
 
 export const metadata: Metadata = {
   title: 'JAckathon - Meta Tic-Tac-Toe',
