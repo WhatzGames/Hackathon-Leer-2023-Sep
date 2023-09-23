@@ -73,6 +73,14 @@ public class WinnableLines : IEnumerable<(int, string)[]>
                      .Select(x=>x.Item1);
     }
     
+    public IEnumerable<int> GetNextBestPositionsV2(string symbol)
+    {
+        return _lines.Where(x => x.Any(y => y.Item2 == symbol) 
+                              && x.Any(z => string.IsNullOrWhiteSpace(z.Item2)))
+                     .SelectMany(x=>x)
+                     .Select(x=>x.Item1);
+    }
+    
     public IEnumerator<(int, string)[]> GetEnumerator()
     {
         return _lines.AsEnumerable().GetEnumerator();

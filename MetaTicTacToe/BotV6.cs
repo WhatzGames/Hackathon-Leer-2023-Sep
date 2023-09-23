@@ -123,7 +123,7 @@ public sealed class BotV6 : BackgroundService
     }
     private static int[] DoMoveBotV6(Game game)
     {
-        
+        var (ourSymbol, enemySymbol) = BotUtils.GetPlayerSymbols(game);
         var forced = BotUtils.GetForced(game);
         int boardSectionIndex;
         if (forced)
@@ -133,7 +133,7 @@ public sealed class BotV6 : BackgroundService
         else
         {
             //todo: hier beste metaboard choice durchführern und diese in den methoden übergeben
-            var weightedMetaBoards = BotUtils.GetWeightedMetaBoards(game);
+            var weightedMetaBoards = BotUtils.GetWeightedMetaBoards(game, ourSymbol, enemySymbol);
             var bestBoards = weightedMetaBoards.GroupBy(x => x.Weight).OrderByDescending(x => x.Key).First().ToArray();
             var randomIndex = Random.Shared.Next(0, bestBoards.Length);
             boardSectionIndex = bestBoards[randomIndex].BoardIndex;
@@ -158,7 +158,6 @@ public sealed class BotV6 : BackgroundService
         }
 
         // First move
-        var (ourSymbol, enemySymbol) = BotUtils.GetPlayerSymbols(game);
         var firstMove = BotUtils.FirstMoveV3(game, boardSectionIndex);
         if (firstMove.Length > 0)
         {

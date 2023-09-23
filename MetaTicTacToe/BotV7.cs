@@ -133,7 +133,7 @@ public sealed class BotV7 : BackgroundService
         else
         {
             //todo: hier beste metaboard choice durchführern und diese in den methoden übergeben
-            var weightedMetaBoards = BotUtils.GetWeightedMetaBoards(game);
+            var weightedMetaBoards = BotUtils.GetWeightedMetaBoards(game, ourSymbol, enemySymbol);
             var bestBoards = weightedMetaBoards.GroupBy(x => x.Weight).OrderByDescending(x => x.Key).First().ToArray();
             var randomIndex = Random.Shared.Next(0, bestBoards.Length);
             boardSectionIndex = bestBoards[randomIndex].BoardIndex;

@@ -3,11 +3,11 @@ using SocketIOClient.Transport;
 
 namespace MetaTicTacToe;
 
-public sealed class BotV7 : BackgroundService
+public sealed class BotV8 : BackgroundService
 {
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        const string secret = "42bfa196-c918-4e7b-9eb0-cb5233be99d4";
+        const string secret = "46415c9e-8823-4567-b7f0-527707bd2240";
 
         var client = new SocketIOClient.SocketIO("https://games.uhno.de",
             new SocketIOOptions { Transport = TransportProtocol.WebSocket });
@@ -67,45 +67,48 @@ public sealed class BotV7 : BackgroundService
     private static int[] GetMove(Game game)
     {
         var forced = BotUtils.GetForced(game);
-        if (!forced)
+        (string ourSymbol, string enemySymbol) = BotUtils.GetPlayerSymbols(game);
+        var lines = new WinnableLines(game.overview);
+
+        int? forcedSectionIndex = null;
+        if (forced)
         {
-            (string ourSymbol, string enemySymbol) = BotUtils.GetPlayerSymbols(game);
-            var lines = new WinnableLines(game.overview);
-            
-            // Can we win the game?
-            var ourWinnableMove = BotUtils.GetWinnableGameMove(ourSymbol, game.board, lines);
-            if (ourWinnableMove.Length > 0)
-            {
-                BotUtils.CheckIllegalMove(game, ourWinnableMove, "BotUtils.GetWinnableGameMove our winnable");
-                return ourWinnableMove;
-            }
-
-            // Can we block the enemy win?
-            var enemyWinnableMove= BotUtils.GetWinnableGameMove(enemySymbol, game.board, lines);
-            if (enemyWinnableMove.Length > 0)
-            {
-                BotUtils.CheckIllegalMove(game, enemyWinnableMove, "BotUtils.GetWinnableGameMove enemy winable");
-                return enemyWinnableMove;
-            }
-
-            // Can we win any board?
-            var ournextBestMove = BotUtils.GetNextBestMove(game, ourSymbol, lines);
-            if (ournextBestMove.Length > 0)
-            {
-                BotUtils.CheckIllegalMove(game, ournextBestMove, "BotUtils.GetNextBestMove ournextbestmove");
-                return ournextBestMove;
-            }
-
-            // Can we block an enemy board win?
-            var enemyNextMove = BotUtils.GetNextBestMove(game, enemySymbol, lines);
-            if (enemyNextMove.Length > 0)
-            {
-                BotUtils.CheckIllegalMove(game, enemyNextMove, "BotUtils.GetNextBestMove enemynextmove");
-                return enemyNextMove;
-            }
+            forcedSectionIndex = game.forcedSection;
         }
 
-        return DoMoveBotV6(game);
+        // Can we win the game?
+        var ourWinnableMove = BotUtils.GetWinnableGameMoveV2(ourSymbol, game.board, lines, forcedSectionIndex);
+        if (ourWinnableMove.Length > 0)
+        {
+            BotUtils.CheckIllegalMove(game, ourWinnableMove, "BotUtils.GetWinnableGameMove our winnable");
+            return ourWinnableMove;
+        }
+        
+        // Can we block the enemy win?
+        var enemyWinnableMove = BotUtils.GetWinnableGameMoveV2(enemySymbol, game.board, lines, forcedSectionIndex);
+        if (enemyWinnableMove.Length > 0)
+        {
+            BotUtils.CheckIllegalMove(game, enemyWinnableMove, "BotUtils.GetWinnableGameMove enemy winnable");
+            return enemyWinnableMove;
+        }
+        
+        // Can we win any board?
+        var ournextBestMove = BotUtils.GetNextBestMoveV2(game, ourSymbol, enemySymbol);
+        if (ournextBestMove.Length > 0)
+        {
+            BotUtils.CheckIllegalMove(game, ournextBestMove, "BotUtils.GetNextBestMove ournextbestmove");
+            return ournextBestMove;
+        }
+
+        // Can we block an enemy board win?
+        var enemyNextMove = BotUtils.GetNextBestMoveV2(game, enemySymbol, ourSymbol);
+        if (enemyNextMove.Length > 0)
+        {
+            BotUtils.CheckIllegalMove(game, enemyNextMove, "BotUtils.GetNextBestMove enemynextmove");
+            return enemyNextMove;
+        }
+
+        return GetMoveInner(game);
     }
     
     private static void Reconnect(SocketIOClient.SocketIO client)
@@ -120,7 +123,7 @@ public sealed class BotV7 : BackgroundService
 
         Console.WriteLine("Reconnected!");
     }
-    private static int[] DoMoveBotV6(Game game)
+    private static int[] GetMoveInner(Game game)
     {
         var (ourSymbol, enemySymbol) = BotUtils.GetPlayerSymbols(game);
 
@@ -133,32 +136,14 @@ public sealed class BotV7 : BackgroundService
         else
         {
             //todo: hier beste metaboard choice durchführern und diese in den methoden übergeben
-            var weightedMetaBoards = BotUtils.GetWeightedMetaBoards(game);
+            var weightedMetaBoards = BotUtils.GetWeightedMetaBoards(game, ourSymbol, enemySymbol);
             var bestBoards = weightedMetaBoards.GroupBy(x => x.Weight).OrderByDescending(x => x.Key).First().ToArray();
             var randomIndex = Random.Shared.Next(0, bestBoards.Length);
             boardSectionIndex = bestBoards[randomIndex].BoardIndex;
         }
 
-        // Win
-        var resultWinField = BotUtils.WinFieldV2(game, boardSectionIndex);
-        if (resultWinField.Length > 0)
-        {
-            BotUtils.CheckIllegalMove(game, resultWinField, "resultWinField");
-            Console.WriteLine("Board:" + resultWinField[0] + " Feld:" + resultWinField[1]);
-            return resultWinField;
-        }
-
-        // Block
-        var resultBlockOpponent = BotUtils.BlockOpponentV2(game, boardSectionIndex);
-        if (resultBlockOpponent.Length > 0)
-        {
-            BotUtils.CheckIllegalMove(game, resultBlockOpponent, "resultBlockOpponent");
-            Console.WriteLine("Board:" + resultBlockOpponent[0] + " Feld:" + resultBlockOpponent[1]);
-            return resultBlockOpponent;
-        }
-
         // "Best" move
-        var weightedPossibleMoves = BotUtils.GetWeightedSectionMoves(game, boardSectionIndex);
+        var weightedPossibleMoves = BotUtils.GetWeightedSectionMovesV2(game, boardSectionIndex);
         var possibleMoves = weightedPossibleMoves.Select(x => x.Move[1]).ToArray();
         if (possibleMoves.Length > 0)
         {
@@ -172,7 +157,7 @@ public sealed class BotV7 : BackgroundService
         var randomBoardSectionIndex = BotUtils.GetRandomBoardSectionIndex(game, forced);
         var boardIndex = BotUtils.GetRandomBoardMoveIndex(game, randomBoardSectionIndex);
         var move = new[] { randomBoardSectionIndex, boardIndex };
-        Console.WriteLine("Board:" + move[0] + " Feld:" + move[1]);
+        Console.WriteLine("RANDOM MOVE!!!");
         BotUtils.CheckIllegalMove(game, move, "random move");
         return move;
     }

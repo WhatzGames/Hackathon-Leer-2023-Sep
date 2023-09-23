@@ -898,7 +898,8 @@ public static class BotUtils
         foreach (int winnableSection in winnableSections)
         {
             // Can't play in this action
-            if (forcedSectionIndex is not null && winnableSection != forcedSectionIndex.Value)
+            var forced = forcedSectionIndex is not null;
+            if (forced && winnableSection != forcedSectionIndex!.Value)
             {
                 continue;
             }
