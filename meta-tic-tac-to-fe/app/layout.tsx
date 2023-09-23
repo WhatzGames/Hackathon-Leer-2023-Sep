@@ -1,9 +1,9 @@
 import './globals.css';
 import type {Metadata} from 'next';
-import {Josefin_Sans} from 'next/font/google';
+import {Acme, Josefin_Sans} from 'next/font/google';
 import {cn} from '@/lib/cn';
 
-const font = Josefin_Sans({subsets: ['latin'], weight: ['400', '600']});
+const font = Acme({subsets: ['latin'], weight: ['400']});
 
 export const metadata: Metadata = {
   title: 'JAckathon - Meta Tic-Tac-Toe',
@@ -17,7 +17,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="de">
-    <body className={cn(font.className, 'w-screen h-screen flex justify-center py-4')}>
+    <body className={cn(font.className, 'w-screen h-screen bg-slate-700 text-white flex justify-center py-4')}>
     {children}
     </body>
     </html>

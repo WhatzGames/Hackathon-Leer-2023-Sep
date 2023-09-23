@@ -7,7 +7,7 @@ export default function GamePage() {
   return (
     <main id={'manual-game'}>
       <div id={'link-container'} className={'absolute top-4 right-4'}>
-        <Link href={'/history'} className={'border border-slate-400 p-4 rounded-xl hover:bg-slate-200'}>
+        <Link href={'/history'} className={'border border-amber-600 bg-amber-500 hover:bg-amber-400 p-4 rounded-xl'}>
           Historie
         </Link>
       </div>

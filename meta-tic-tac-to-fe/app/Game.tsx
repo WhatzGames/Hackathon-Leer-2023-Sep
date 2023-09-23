@@ -4,6 +4,7 @@ import {useGameStore} from '@/app/game-store';
 import ProgressBar from '@/app/ProgressBar';
 import EndScreen from '@/app/EndScreen';
 import Board from '@/app/Board';
+import {Player} from '@/app/Player';
 
 type GameProps = {
   view?: boolean;
@@ -25,8 +26,8 @@ export default function Game({view = false, onNewGame}: GameProps) {
 
       <div className="flex justify-around">
         {players.map((player) => (
-          <h2 key={player.id} className={'text-2xl text-center mb-4'}>
-            <span className={'mr-4'}>{player.symbol}</span>
+          <h2 key={player.id} className={'text-2xl text-center mb-4 flex items-center gap-4'}>
+            <Player>{player.symbol}</Player>
             <span>{player.name || player.id}</span>
           </h2>
         ))}
