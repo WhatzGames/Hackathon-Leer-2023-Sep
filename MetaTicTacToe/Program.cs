@@ -9,7 +9,7 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-builder.Services.AddHostedService<BotV8>();
+builder.Services.AddHostedService<BotV10>();
 
 var app = builder.Build();
 
