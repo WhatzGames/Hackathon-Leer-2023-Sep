@@ -31,7 +31,7 @@ export default function Game({view = false, onNewGame}: GameProps) {
           <h2 key={player.id}
               className={cn(
                 'text-2xl text-center mb-4 flex items-center gap-4 transition-transform',
-                activePlayer === player.id ? 'scale-125' : 'scale-90 opacity-70'
+                activePlayer === player.id ? 'scale-125' : 'scale-75 opacity-50'
               )}>
             <Player>{player.symbol}</Player>
             <span>{player.name || player.id}</span>
