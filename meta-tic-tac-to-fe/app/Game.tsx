@@ -36,10 +36,12 @@ export default function Game({view = false, onNewGame}: GameProps) {
 
       {!view && <ProgressBar className={'mb-4'}/>}
 
-      <div className={'grid grid-cols-3 grid-rows-3 gap-3'}>
-        {game.map((board, index) => (
-          <Board key={board.id} boardNo={index} fields={board.fields} view={view}/>
-        ))}
+      <div className="flex justify-center w-full">
+        <div className={'w-fit grid grid-cols-3 grid-rows-3 gap-3'}>
+          {game.map((board, index) => (
+            <Board key={board.id} boardNo={index} fields={board.fields} view={view}/>
+          ))}
+        </div>
       </div>
     </>
   );
