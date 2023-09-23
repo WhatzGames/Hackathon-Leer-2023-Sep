@@ -10,6 +10,7 @@ import {randomName} from '@/lib/random-name';
 
 export default function HistoryPage() {
   const setField = useGameStore(state => state.setField);
+  const wait = useGameStore(state => state.wait);
   const setPlayers = useGameStore(state => state.setPlayers);
   const [play, setPlay] = useState(false);
   const [playedGames, setPlayedGames] = useState<PlayedGame[]>([]);
@@ -96,7 +97,7 @@ export default function HistoryPage() {
               <Button type={'button'} onClick={togglePlay}>
                 {play ? <LucidePause/> :<LucidePlay/>}
               </Button>
-              <Button type={'button'} onClick={() => nextStep(step)} disabled={play}>
+              <Button type={'button'} onClick={() => nextStep(step)} disabled={wait || play}>
                 Weiter
               </Button>
             </>
