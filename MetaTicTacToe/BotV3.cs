@@ -3,6 +3,7 @@ using SocketIOClient.Transport;
 
 namespace MetaTicTacToe;
 
+/*
 public sealed class BotV3 : BackgroundService
 {
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -115,3 +116,4 @@ public sealed class BotV3 : BackgroundService
         return move;
     }
 }
+*/

@@ -1,19 +1,20 @@
-using SocketIOClient;
+﻿using SocketIOClient;
 using SocketIOClient.Transport;
 
 namespace MetaTicTacToe;
 
-public sealed class BotV4 : BackgroundService
+public sealed class BotV5 : BackgroundService
 {
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        const string secret = "e685de0b-8ded-4a76-9cfc-d42214261688";
+        const string secret = "f2baebc8-46a1-4e70-b294-34baa407de3b";
 
         var client = new SocketIOClient.SocketIO("https://games.uhno.de",
             new SocketIOOptions { Transport = TransportProtocol.WebSocket });
 
         client.OnConnected += (sender, e) => Console.WriteLine("Connected");
         client.OnDisconnected += (_, _) => Reconnect(client);
+
 
         await client.ConnectAsync();
 
@@ -48,19 +49,6 @@ public sealed class BotV4 : BackgroundService
         }
     }
 
-    private static void Reconnect(SocketIOClient.SocketIO client)
-    {
-        Console.WriteLine("Disconnected");
-        while (!client.Connected)
-        {
-            Task.Delay(5000).Wait();
-            Console.WriteLine("Attempting reconnect");
-            client.ConnectAsync().Wait();
-        }
-
-        Console.WriteLine("Reconnected!");
-    }
-
     private void Init(Game game)
     {
     }
@@ -78,6 +66,47 @@ public sealed class BotV4 : BackgroundService
 
     private static int[] GetMove(Game game)
     {
+        var forced = BotUtils.GetForced(game);
+        if (!forced)
+        {
+            (string ourSymbol, string enemySymbol) = BotUtils.GetPlayerSymbols(game);
+            var lines = new WinnableLines(game.overview);
+            var ourWinnableMove = BotUtils.GetWinnableGameMove(ourSymbol, game.board, lines);
+            if (ourWinnableMove.Length > 0)
+            {
+                return ourWinnableMove;
+            }
+            var enemyWinnableMove= BotUtils.GetWinnableGameMove(enemySymbol, game.board, lines);
+            if (enemyWinnableMove.Length > 0)
+            {
+                return enemyWinnableMove;
+            }
+            
+            var enemyNextMove = BotUtils.GetNextBestMove(game, enemySymbol, lines);
+            if (enemyNextMove.Length > 0)
+            {
+                return enemyNextMove;
+            }
+            var ournextBestMove = BotUtils.GetNextBestMove(game, ourSymbol, lines);
+            if (ournextBestMove.Length > 0)
+            {
+                return ournextBestMove;
+            }
+        }
+
         return BotInstanceV4.DoMove(game);
+    }
+    
+    private static void Reconnect(SocketIOClient.SocketIO client)
+    {
+        Console.WriteLine("Disconnected");
+        while (!client.Connected)
+        {
+            Task.Delay(5000).Wait();
+            Console.WriteLine("Attempting reconnect");
+            client.ConnectAsync().Wait();
+        }
+
+        Console.WriteLine("Reconnected!");
     }
 }
