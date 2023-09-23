@@ -126,6 +126,12 @@ public static class BotUtils
                 {
                     weights[e.index] += 1;
                 }
+                
+                // The middle is worth even more than corners 
+                if (e.index is 4)
+                {
+                    weights[e.index] += 100;
+                }
             }
         }
         
@@ -153,6 +159,8 @@ public static class BotUtils
             var move = new []{boardSectionIndex, i};
             moves.Add(new WeightedMove(move, weight));
         }
+        
+        // 
         
         var orderedMoves = moves.OrderByDescending(x => x.Weight).ToList();
         return orderedMoves;
