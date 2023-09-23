@@ -375,6 +375,111 @@ public static class BotUtils
         return orderedMoves;
     }
     
+    public static List<WeightedMove> GetWeightedSectionMovesV4(Game game, int boardSectionIndex, string ourSymbol, string enemySymbol)
+    {
+        var board = game.board[boardSectionIndex];
+
+        // Get all possible winning triplets.
+        var row0 = new[] { (0, board[0]), (1, board[1]), (2, board[2]) };
+        var row1 = new[] { (3, board[3]), (4, board[4]), (5, board[5]) };
+        var row2 = new[] { (6, board[6]), (7, board[7]), (8, board[8]) };
+
+        var col0 = new[] { (0, board[0]), (3, board[3]), (6, board[6]) };
+        var col1 = new[] { (1, board[1]), (4, board[4]), (7, board[7]) };
+        var col2 = new[] { (2, board[2]), (5, board[5]), (8, board[8]) };
+
+        var dia0 = new[] { (0, board[0]), (4, board[4]), (8, board[8]) };
+        var dia1 = new[] { (6, board[6]), (4, board[4]), (2, board[2]) };
+
+        var permutations = new (int index, string symbol)[][]
+        {
+            row0, row1, row2, col0, col1, col2, dia0, dia1
+        };
+        
+        int[] weights = 
+          { 1,  0, 1, 
+            0, 10, 0,
+            1,  0, 1 };
+
+        foreach (var triplet in permutations)
+        {
+            // triplet is already full
+            if (triplet.All(x => x.symbol != ""))
+            {
+                continue;
+            }
+            
+            // Can't win triplet anymore
+            if (triplet.Any(x => x.symbol == enemySymbol))
+            {
+                continue;
+            }
+
+            // Empty triplet does not lead to winning move on next turn
+            if (triplet.All(x => x.symbol == ""))
+            {
+                continue;
+            }
+            
+            // We have two symbols in the triplet and one is still empty
+            if (triplet.Count(x => x.symbol == ourSymbol) == 2)
+            {
+                var t = triplet.First(x => x.symbol == "");
+                weights[t.index] = 1_000;
+                continue;
+            }
+
+            // Now we have one of our symbols and two empty ones.
+            var empty = triplet.Where(x => x.symbol == "");
+            foreach (var e in empty)
+            {
+                weights[e.index] += 100;
+            }
+        }
+        
+        // This should mark all already set fields as invalid
+        for (var i = 0; i < board.Count; i++)
+        {
+            var symbol = board[i];
+            if (symbol != "")
+            {
+                weights[i] = -1;
+            }
+        }
+
+        var moves = new List<WeightedMove>();
+        for (int i = 0; i < weights.Length; i++ )
+        {
+            var weight = weights[i];
+            
+            // Do not return impossible moves 
+            if (weight == -1)
+            {
+                continue;
+            }
+            
+            var move = new []{boardSectionIndex, i};
+            moves.Add(new WeightedMove(move, weight));
+        }
+        
+        // Add win weighting
+        var winningMove = GetCriticalMove(ourSymbol, permutations);
+        if (winningMove is not -1)
+        {
+            weights[winningMove] += 100_000;
+        }
+
+        // Add block weighting
+        var blockingMove = GetCriticalMove(enemySymbol, permutations);
+        if (blockingMove is not -1)
+        {
+            weights[blockingMove] += 10_000;
+        }
+
+        var orderedMoves = moves.OrderByDescending(x => x.Weight).ToList();
+        return orderedMoves;
+    }
+    
     public static List<WeightedBoard> GetWeightedMetaBoards(Game game, string ourSymbol, string enemySymbol)
     {
         var board = game.overview;
@@ -533,7 +638,7 @@ public static class BotUtils
             if (triplet.Count(x => x.symbol == symbols.ourSymbol) == 2)
             {
                 var t = triplet.First(x => x.symbol == "");
-                weights[t.index] = 1000;
+                weights[t.index] = 1_000;
                 continue;
             }
 
@@ -543,6 +648,20 @@ public static class BotUtils
             {
                 weights[e.index] += 100;
             }
+        }
+        
+        // Add win weighting
+        var winningMove = GetCriticalMove(ourSymbol, permutations);
+        if (winningMove is not -1)
+        {
+            weights[winningMove] += 100_000;
+        }
+
+        // Add block weighting
+        var blockingMove = GetCriticalMove(enemySymbol, permutations);
+        if (blockingMove is not -1)
+        {
+            weights[blockingMove] += 10_000;
         }
         
         // This should mark all already set fields as invalid
@@ -571,6 +690,46 @@ public static class BotUtils
 
         var orderedBoards = boards.OrderByDescending(x => x.Weight).ToList();
         return orderedBoards;
+    }
+
+    public static List<WeightedBoard> GetCombinedWeightedMetaBoards(Game game, string ourSymbol, string enemySymbol)
+    {
+        var bestSections = new Dictionary<int, WeightedBoard>();
+        var ourBestSections = GetWeightedMetaBoardsV2(game, ourSymbol, enemySymbol);
+        var enemyBestSections = GetWeightedMetaBoardsV2(game, enemySymbol, ourSymbol);
+        foreach (var weighted in ourBestSections.Concat(enemyBestSections))
+        {
+            if (bestSections.TryGetValue(weighted.BoardIndex, out var weight))
+            {
+                weight.Weight += weighted.Weight;
+            }
+            else
+            {
+                bestSections[weighted.BoardIndex] = weighted;
+            }
+        }
+
+        return bestSections.Values.OrderByDescending(x => x.Weight).ToList();
+    }
+    
+    public static List<WeightedMove> GetCombinedWeightedSectionMoves(Game game, int boardSectionIndex, string ourSymbol, string enemySymbol)
+    {
+        var bestSections = new Dictionary<int, WeightedMove>();
+        var ourBestSections = GetWeightedSectionMovesV4(game, boardSectionIndex, ourSymbol, enemySymbol);
+        var enemyBestSections = GetWeightedSectionMovesV4(game, boardSectionIndex, enemySymbol, ourSymbol);
+        foreach (var weighted in ourBestSections.Concat(enemyBestSections))
+        {
+            if (bestSections.TryGetValue(weighted.Move[1], out var weight))
+            {
+                weight.Weight += weighted.Weight;
+            }
+            else
+            {
+                bestSections[weighted.Move[1]] = weighted;
+            }
+        }
+
+        return bestSections.Values.OrderByDescending(x => x.Weight).ToList();
     }
 
     public static int[] FirstMove(Game game)
@@ -1174,7 +1333,64 @@ public static class BotUtils
 
         return possibleMoves.FirstOrDefault(Array.Empty<int>());
     }
+    
+    public static int[] GetNextBestMoveV3(Game game, string ourSymbol, string enemySymbol, int? forcedSectionIndex)
+    {
+        var forced = forcedSectionIndex is not null;
+        List<int[]> possibleMoves = new List<int[]>();
+        for (var i = 0; i < game.overview.Count; i++)
+        {
+            // Can't play in this action
+            if (forced && i != forcedSectionIndex!.Value)
+            {
+                continue;
+            }
+            
+            if(!string.IsNullOrWhiteSpace(game.overview[i]))
+                continue;
+
+            var sectionLines = new WinnableLines(game.board[i]);
+            var position = GetCriticalMove(ourSymbol, sectionLines);
+            if (position >= 0)
+            {
+                possibleMoves.Add(new []{i, position});
+            }
+        }
+
+        var sections = GetCombinedWeightedMetaBoards(game, ourSymbol, enemySymbol).Select(x => x.BoardIndex);
+        foreach (int section in sections)
+        {
+            var move = possibleMoves.Find(x => x[0] == section);
+            if (move is not null)
+            {
+                return move;
+            }
+        }
+
+        return possibleMoves.FirstOrDefault(Array.Empty<int>());
+    }
 }
 
-public record WeightedMove(int[] Move, double Weight);
-public record WeightedBoard(int BoardIndex, double Weight);
+public class WeightedMove
+{
+    public WeightedMove(int[] move, double weight)
+    {
+        Move = move;
+        Weight = weight;
+    }
+
+    public int[] Move { get; set; }
+    public double Weight { get; set; }
+}
+
+public class WeightedBoard
+{
+    public WeightedBoard(int boardIndex, double weight)
+    {
+        BoardIndex = boardIndex;
+        Weight = weight;
+    }
+
+    public int BoardIndex { get; set; }
+    public double Weight { get; set; }
+};
