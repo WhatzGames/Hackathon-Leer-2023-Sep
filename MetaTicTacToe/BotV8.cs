@@ -93,7 +93,7 @@ public sealed class BotV8 : BackgroundService
         }
         
         // Can we win any board?
-        var ournextBestMove = BotUtils.GetNextBestMoveV2(game, ourSymbol, enemySymbol);
+        var ournextBestMove = BotUtils.GetNextBestMoveV2(game, ourSymbol, enemySymbol, forcedSectionIndex);
         if (ournextBestMove.Length > 0)
         {
             BotUtils.CheckIllegalMove(game, ournextBestMove, "BotUtils.GetNextBestMove ournextbestmove");
@@ -101,7 +101,7 @@ public sealed class BotV8 : BackgroundService
         }
 
         // Can we block an enemy board win?
-        var enemyNextMove = BotUtils.GetNextBestMoveV2(game, enemySymbol, ourSymbol);
+        var enemyNextMove = BotUtils.GetNextBestMoveV2(game, enemySymbol, ourSymbol, forcedSectionIndex);
         if (enemyNextMove.Length > 0)
         {
             BotUtils.CheckIllegalMove(game, enemyNextMove, "BotUtils.GetNextBestMove enemynextmove");
@@ -136,14 +136,14 @@ public sealed class BotV8 : BackgroundService
         else
         {
             //todo: hier beste metaboard choice durchführern und diese in den methoden übergeben
-            var weightedMetaBoards = BotUtils.GetWeightedMetaBoards(game, ourSymbol, enemySymbol);
+            var weightedMetaBoards = BotUtils.GetWeightedMetaBoardsV2(game, ourSymbol, enemySymbol);
             var bestBoards = weightedMetaBoards.GroupBy(x => x.Weight).OrderByDescending(x => x.Key).First().ToArray();
             var randomIndex = Random.Shared.Next(0, bestBoards.Length);
             boardSectionIndex = bestBoards[randomIndex].BoardIndex;
         }
 
         // "Best" move
-        var weightedPossibleMoves = BotUtils.GetWeightedSectionMovesV2(game, boardSectionIndex);
+        var weightedPossibleMoves = BotUtils.GetWeightedSectionMovesV3(game, boardSectionIndex);
         var possibleMoves = weightedPossibleMoves.Select(x => x.Move[1]).ToArray();
         if (possibleMoves.Length > 0)
         {
