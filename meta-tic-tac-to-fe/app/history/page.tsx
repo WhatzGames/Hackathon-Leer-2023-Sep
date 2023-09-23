@@ -64,7 +64,9 @@ export default function HistoryPage() {
     game = game || viewGame;
 
     if (game) {
-      game.players.find(p => p.id === game!.self)!.name = 'JAckathon';
+      game.players.forEach(player => {
+        player.name = player.id === game!.self ? 'JAckathon' : 'Gegner';
+      });
       setPlayers(game?.players || []);
       setStep(0);
     }

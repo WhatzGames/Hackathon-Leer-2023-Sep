@@ -47,8 +47,8 @@ const checkBoard = (fields: Field[]): PlayerSymbol | null => {
 
 const initialState = (): GameState => {
   const players: Player[] = [
-    {id: '1', symbol: 'X', score: 0},
-    {id: '2', symbol: 'O', score: 0},
+    {id: 'Spieler 1', symbol: 'X', score: 0},
+    {id: 'Spieler 2', symbol: 'O', score: 0},
   ];
 
   return {
