@@ -6,6 +6,7 @@ import Game from '@/app/Game';
 import {useGameStore} from '@/app/game-store';
 import {LucidePause, LucidePlay} from 'lucide-react';
 import {Button} from '@/components/Button';
+import {randomName} from '@/lib/random-name';
 
 export default function HistoryPage() {
   const setField = useGameStore(state => state.setField);
@@ -65,7 +66,7 @@ export default function HistoryPage() {
 
     if (game) {
       game.players.forEach(player => {
-        player.name = player.id === game!.self ? 'JAckathon' : 'Gegner';
+        player.name = player.id === game!.self ? 'JAckathon' : randomName();
       });
       setPlayers(game?.players || []);
       setStep(0);
