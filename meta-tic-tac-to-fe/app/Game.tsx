@@ -20,11 +20,6 @@ export default function Game({view = false, onNewGame}: GameProps) {
   return (
     <>
       <EndScreen onNewGame={onNewGame}/>
-      {!view &&
-        <>
-          <h1 className={'text-3xl text-center mb-12'}>JAckathon - Meta Tic-Tac-Toe</h1>
-        </>
-      }
 
       <div className="flex justify-around">
         {players.map((player) => (
@@ -39,17 +34,12 @@ export default function Game({view = false, onNewGame}: GameProps) {
         ))}
       </div>
 
-      <div className={'flex justify-center'}>
-        {!view &&
-          <div id={'progress-bar'} className={'mr-8'}>
-            <ProgressBar/>
-          </div>
-        }
-        <div className={'grid grid-cols-3 grid-rows-3 gap-3'}>
-          {game.map((board, index) => (
-            <Board key={board.id} boardNo={index} fields={board.fields} view={view}/>
-          ))}
-        </div>
+      {!view && <ProgressBar className={'mb-4'}/>}
+
+      <div className={'grid grid-cols-3 grid-rows-3 gap-3'}>
+        {game.map((board, index) => (
+          <Board key={board.id} boardNo={index} fields={board.fields} view={view}/>
+        ))}
       </div>
     </>
   );

@@ -1,8 +1,9 @@
 import {useGameStore} from '@/app/game-store';
 import {useProgressStore} from '@/app/progress-store';
 import {useEffect} from 'react';
+import {cn} from '@/lib/cn';
 
-export default function ProgressBar() {
+export default function ProgressBar({className, ...props}: React.HTMLAttributes<HTMLDivElement>) {
   const player = useGameStore(state => state.activePlayer);
   const {progress, tick, reset} = useProgressStore();
 
@@ -18,8 +19,10 @@ export default function ProgressBar() {
   }, [player]);
 
   return (
-    <div className={'relative bg-gray-200 mx-2 rounded-lg h-full'} style={{width: 12}}>
-      <div className={'absolute bottom-0 rounded-lg bg-red-300 z-10'} style={{width: 12, height: `${progress}%`}}></div>
+    <div className={cn('relative bg-gray-200 rounded-lg w-full', className)}
+         style={{height: 12}}
+         {...props}>
+      <div className={'absolute bottom-0 rounded-lg bg-red-300 z-10'} style={{height: 12, width: `${progress}%`}}></div>
     </div>
   );
 };

@@ -80,7 +80,7 @@ export default function HistoryPage() {
 
   return (
     <main id={'history-page'} className={'min-w-[828px]'}>
-      <h1 className={'text-3xl mb-4'}>Historie</h1>
+      <h1 className={'text-5xl mb-8 -rotate-2'}>Historie</h1>
 
       <div className="w-full flex justify-between mb-4">
         <div className="flex gap-2">
