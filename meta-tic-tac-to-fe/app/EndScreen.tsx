@@ -4,7 +4,6 @@ import {Button} from '@/components/Button';
 import {cn} from '@/lib/cn';
 
 export default function EndScreen({onNewGame}: {onNewGame?: () => void}) {
-  const progress = useProgressStore(state => state.progress);
   const winner = useGameStore(state => state.winner);
   const players = useGameStore(state => state.players);
   const newGame = useGameStore(state => state.newGame);
@@ -31,7 +30,7 @@ export default function EndScreen({onNewGame}: {onNewGame?: () => void}) {
         <h1 className={cn(
           'text-8xl italic -rotate-6 font-bold animate-pulse mb-12'
         )}>
-          {players.find(p => p.symbol === winner)?.name}
+          {players.find(p => p.symbol === winner)?.name || players.find(p => p.symbol === winner)?.id}
         </h1>
         <h3 className={'text-4xl'}>hat gewonnen!</h3>
         <Button className={'mt-28 text-3xl py-6 px-12 w-fit hover:animate-ping'}

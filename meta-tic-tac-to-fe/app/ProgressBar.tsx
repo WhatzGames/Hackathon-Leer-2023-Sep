@@ -5,6 +5,7 @@ import {cn} from '@/lib/cn';
 
 export default function ProgressBar({className, ...props}: React.HTMLAttributes<HTMLDivElement>) {
   const player = useGameStore(state => state.activePlayer);
+  const endGame = useGameStore(state => state.endGame);
   const {progress, tick, reset} = useProgressStore();
 
   useEffect(() => {
@@ -13,6 +14,12 @@ export default function ProgressBar({className, ...props}: React.HTMLAttributes<
       clearInterval(interval);
     };
   },  []);
+
+  useEffect(() => {
+    if (progress <= 0) {
+      endGame();
+    }
+  }, [progress]);
 
   useEffect(() => {
     reset();

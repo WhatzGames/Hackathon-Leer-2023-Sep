@@ -19,6 +19,7 @@ type GameActions = {
   setPlayers: (players: Player[]) => void;
   switchPlayer: () => void;
   newGame: () => void;
+  endGame: () => void;
 }
 
 const checkBoard = (fields: Field[]): PlayerSymbol | null => {
@@ -151,6 +152,19 @@ export const useGameStore = create<GameState & GameActions>((set, get) => ({
     set((state) => ({
       ...state,
       ...initialState(),
+    }));
+  },
+  endGame() {
+    const activePlayer = get().activePlayer;
+    const winner = get().players.find(player => player.id !== activePlayer);
+
+    if (!winner) {
+      throw new Error('Could not determine winner.');
+    }
+
+    set((state) => ({
+      ...state,
+      winner: winner.symbol
     }));
   }
 }));
