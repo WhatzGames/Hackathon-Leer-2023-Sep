@@ -81,7 +81,7 @@ export default function HistoryPage() {
       <div className="w-full flex justify-between mb-4">
         <div className="flex gap-2">
           <select value={viewGame?.id}
-                  className={'border border-slate-400 hover:bg-slate-200 p-4 bg-white rounded-xl'}
+                  className={'text-slate-800 border border-slate-400 hover:bg-slate-200 p-4 bg-white rounded-xl'}
                   onChange={handleChange}>
             <option value="">Such dir was aus...</option>
             {playedGames.map(p => <option key={p.id} value={p.id}>{p.id}</option>)}
