@@ -7,6 +7,7 @@ import {Field, Game, Player, PlayerSymbol} from '@/app/types';
 type GameState = {
   game: Game;
   wait: boolean;
+  isRunning: boolean;
   players: Player[];
   activePlayer: string;
   winner: PlayerSymbol | null;
@@ -19,6 +20,7 @@ type GameActions = {
   setPlayers: (players: Player[]) => void;
   switchPlayer: () => void;
   newGame: () => void;
+  startGame: () => void;
   endGame: () => void;
 }
 
@@ -55,6 +57,7 @@ const initialState = (): GameState => {
 
   return {
     wait: false,
+    isRunning: false,
     game: [
       {id: randomUUID(), fields: [null, null, null, null, null, null, null, null, null]},
       {id: randomUUID(), fields: [null, null, null, null, null, null, null, null, null]},
@@ -154,6 +157,12 @@ export const useGameStore = create<GameState & GameActions>((set, get) => ({
       ...initialState(),
     }));
   },
+  startGame() {
+    set((state) => ({
+      ...state,
+      isRunning: true
+    }))
+  },
   endGame() {
     const activePlayer = get().activePlayer;
     const winner = get().players.find(player => player.id !== activePlayer);
@@ -164,6 +173,7 @@ export const useGameStore = create<GameState & GameActions>((set, get) => ({
 
     set((state) => ({
       ...state,
+      isRunning: false,
       winner: winner.symbol
     }));
   }

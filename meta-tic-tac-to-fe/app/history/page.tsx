@@ -4,9 +4,10 @@ import {ChangeEvent, useEffect, useState} from 'react';
 import {PlayedGame} from '@/app/types';
 import Game from '@/app/Game';
 import {useGameStore} from '@/app/game-store';
-import {LucidePause, LucidePlay} from 'lucide-react';
+import {LucidePause, LucidePlay, LucideRefreshCcw} from 'lucide-react';
 import {Button} from '@/components/Button';
 import {randomName} from '@/lib/random-name';
+import Link from 'next/link';
 
 export default function HistoryPage() {
   const setField = useGameStore(state => state.setField);
@@ -81,6 +82,12 @@ export default function HistoryPage() {
 
   return (
     <main id={'history-page'} className={'min-w-[828px]'}>
+      <div id={'link-container'} className={'absolute top-8 right-4 z-50'}>
+        <Link href={'/'} className={'border border-amber-600 bg-amber-500 hover:bg-amber-400 p-4 rounded-xl'}>
+          Selber spielen?
+        </Link>
+      </div>
+
       <h1 className={'text-5xl mb-8 -rotate-2'}>Historie</h1>
 
       <div className="w-full flex justify-between mb-4">
@@ -91,6 +98,12 @@ export default function HistoryPage() {
             <option value="">Such dir was aus...</option>
             {playedGames.map(p => <option key={p.id} value={p.id}>{p.id}</option>)}
           </select>
+
+          <Button type={'button'}
+                  disabled={play}
+                  onClick={() => fetchPlayedGames()}>
+            <LucideRefreshCcw/>
+          </Button>
 
           {viewGame &&
             <>
@@ -103,11 +116,6 @@ export default function HistoryPage() {
             </>
           }
         </div>
-
-        <Button type={'button'}
-                onClick={() => fetchPlayedGames()}>
-          Neu laden
-        </Button>
       </div>
 
       {viewGame && <Game onNewGame={onNewGame} view/>}

@@ -5,15 +5,23 @@ import {cn} from '@/lib/cn';
 
 export default function ProgressBar({className, ...props}: React.HTMLAttributes<HTMLDivElement>) {
   const player = useGameStore(state => state.activePlayer);
+  const isRunning = useGameStore(state => state.isRunning);
   const endGame = useGameStore(state => state.endGame);
   const {progress, tick, reset} = useProgressStore();
 
   useEffect(() => {
-    const interval = setInterval(() => tick(), 50);
+    let interval: ReturnType<typeof setInterval>;
+
+    if (isRunning) {
+      interval = setInterval(() => tick(), 50);
+    }
+
     return () => {
-      clearInterval(interval);
+      if (interval) {
+        clearInterval(interval);
+      }
     };
-  },  []);
+  },  [isRunning]);
 
   useEffect(() => {
     if (progress <= 0) {
