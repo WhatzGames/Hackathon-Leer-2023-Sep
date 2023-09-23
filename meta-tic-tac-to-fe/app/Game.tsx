@@ -5,6 +5,7 @@ import ProgressBar from '@/app/ProgressBar';
 import EndScreen from '@/app/EndScreen';
 import Board from '@/app/Board';
 import {Player} from '@/app/Player';
+import {cn} from '@/lib/cn';
 
 type GameProps = {
   view?: boolean;
@@ -13,6 +14,7 @@ type GameProps = {
 
 export default function Game({view = false, onNewGame}: GameProps) {
   const game = useGameStore(state => state.game);
+  const activePlayer = useGameStore(state => state.activePlayer);
   const players = useGameStore(state => state.players);
 
   return (
@@ -26,7 +28,11 @@ export default function Game({view = false, onNewGame}: GameProps) {
 
       <div className="flex justify-around">
         {players.map((player) => (
-          <h2 key={player.id} className={'text-2xl text-center mb-4 flex items-center gap-4'}>
+          <h2 key={player.id}
+              className={cn(
+                'text-2xl text-center mb-4 flex items-center gap-4 transition-transform',
+                activePlayer === player.id ? 'scale-125' : 'scale-90 opacity-70'
+              )}>
             <Player>{player.symbol}</Player>
             <span>{player.name || player.id}</span>
           </h2>
