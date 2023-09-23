@@ -29,7 +29,7 @@ export default function HistoryPage() {
     if (play) {
       interval = setInterval(() => {
         nextStep(step);
-      }, 200);
+      }, 500);
     }
 
     return () => {
