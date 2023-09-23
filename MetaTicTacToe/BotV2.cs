@@ -3,11 +3,11 @@ using SocketIOClient.Transport;
 
 namespace MetaTicTacToe;
 
-public sealed class Bot : BackgroundService
+public sealed class BotV2 : BackgroundService
 {
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        const string secret = "e2d5483c-546b-422b-b883-6f099d7efcb7";
+        const string secret = "913544ef-2b69-4ac4-b338-3700c83f88b5";
         
         var client = new SocketIOClient.SocketIO("https://games.uhno.de",
             new SocketIOOptions {Transport = TransportProtocol.WebSocket});
@@ -59,11 +59,8 @@ public sealed class Bot : BackgroundService
     
     private async Task RoundAsync(Game game, SocketIOResponse response)
     {
-        var forced = BotUtils.GetForced(game);
-        var boardSectionIndex = BotUtils.GetRandomBoardSectionIndex(game, forced);
-        var boardMoveIndex = BotUtils.GetRandomBoardMoveIndex(game, boardSectionIndex);
-        var move = new int[] { boardSectionIndex, boardMoveIndex };
-        BotUtils.CheckIllegalMove(game, move);
-        await response.CallbackAsync(move);
+        var bot = new BotInstanceV2();
+
+        await response.CallbackAsync(bot.DoMove(game));
     }
 }
