@@ -1,6 +1,5 @@
 import {useGameStore} from '@/app/game-store';
 import {cn} from '@/lib/cn';
-import {LucideCircle, LucideX} from 'lucide-react';
 import {Player} from '@/app/Player';
 
 export type FieldProps = {
@@ -10,7 +9,7 @@ export type FieldProps = {
   size?: number;
 }
 
-export default function Field({board, field, view, size = 72, children}: React.PropsWithChildren<FieldProps>) {
+export default function Field({board, field, view, size = 64, children}: React.PropsWithChildren<FieldProps>) {
   const setField = useGameStore(state => state.setField);
 
   const handleClick = () => setField(board, field);

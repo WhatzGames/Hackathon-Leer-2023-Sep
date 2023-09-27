@@ -34,7 +34,7 @@ export default function Game({view = false, onNewGame}: GameProps) {
         ))}
       </div>
 
-      {!view && <ProgressBar className={'mb-4'}/>}
+      {/*{!view && <ProgressBar className={'mb-4'}/>}*/}
 
       <div className="flex justify-center w-full">
         <div className={'w-fit grid grid-cols-3 grid-rows-3 gap-3'}>

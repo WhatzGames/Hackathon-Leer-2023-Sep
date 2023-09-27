@@ -19,7 +19,7 @@ export default function HistoryPage() {
   const [step, setStep] = useState(0);
 
   const fetchPlayedGames = () => {
-    fetch('http://localhost:3000/api/history')
+    fetch('/api/history')
       .then(res => res.json())
       .then(games => setPlayedGames(games));
   };
